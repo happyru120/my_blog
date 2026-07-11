@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>영상 → GIF 변환기 — 네이버 블로그 기준 자동 압축 | 블로그 도구함</title>
 <meta name="description" content="영상을 잘라 GIF로 만들고 네이버 블로그 업로드 기준(10MB, 폭 966px)에 맞게 자동 압축합니다. 파일은 서버로 전송되지 않아요.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 </head>
@@ -28,9 +29,10 @@
   <section class="panel" id="panel-upload">
     <h2><span class="step-num">1</span> 영상 올리기</h2>
     <div class="drop-zone" id="dropZone">
-      <div class="dz-icon">📂</div>
-      <p class="dz-main">영상 파일을 여기에 끌어다 놓거나 클릭해서 선택하세요</p>
+      <div class="dz-icon">🎞️</div>
+      <p class="dz-main">영상 파일을 여기에 끌어다 놓으세요</p>
       <p>MP4 · WebM · MOV 등 브라우저에서 재생 가능한 영상</p>
+      <span class="dz-btn">파일 선택</span>
     </div>
     <input type="file" id="fileInput" accept="video/*,.mov,.mp4,.webm,.m4v" class="hidden">
   </section>
@@ -126,6 +128,13 @@
     <h2><span class="step-num">4</span> 완성! 확인하고 저장하세요</h2>
     <div class="result-preview"><img id="resultImg" alt="완성된 GIF 미리보기"></div>
     <div class="result-verdict" id="resultVerdict"></div>
+    <div class="size-gauge">
+      <div class="size-gauge-track"><div class="size-gauge-fill" id="sizeGaugeFill"></div></div>
+      <div class="size-gauge-labels">
+        <span class="used" id="sizeGaugeUsed">-</span>
+        <span>네이버 블로그 제한 10MB</span>
+      </div>
+    </div>
     <div class="result-stats">
       <div class="stat"><div class="stat-label">파일 크기</div><div class="stat-value" id="statSize">-</div></div>
       <div class="stat"><div class="stat-label">크기 (px)</div><div class="stat-value" id="statDim">-</div></div>

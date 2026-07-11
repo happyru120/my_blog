@@ -42,6 +42,8 @@ const els = {
   statFrames: $('statFrames'),
   downloadBtn: $('downloadBtn'),
   retryBtn: $('retryBtn'),
+  sizeGaugeFill: $('sizeGaugeFill'),
+  sizeGaugeUsed: $('sizeGaugeUsed'),
 };
 
 let currentFile = null;
@@ -371,6 +373,12 @@ function showResult(result, fps) {
   els.statDim.textContent = `${result.width}×${result.height}`;
   els.statLen.textContent = formatTime((result.frameCount * result.delay) / 1000);
   els.statFrames.textContent = `${result.frameCount}장 · ${Math.round(1000 / result.delay)}fps`;
+
+  const usedPct = Math.min(100, (result.size / NAVER_LIMIT) * 100);
+  els.sizeGaugeFill.style.width = '0%';
+  requestAnimationFrame(() => { els.sizeGaugeFill.style.width = usedPct + '%'; });
+  els.sizeGaugeFill.classList.toggle('over', result.size > NAVER_LIMIT);
+  els.sizeGaugeUsed.textContent = `${formatSize(result.size)} 사용 (${Math.round((result.size / NAVER_LIMIT) * 100)}%)`;
 
   const verdict = els.resultVerdict;
   if (result.size <= NAVER_LIMIT) {
