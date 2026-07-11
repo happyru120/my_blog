@@ -683,6 +683,67 @@ input[type="range"]::-moz-range-thumb {
 
 .result-actions .btn { flex: 1 1 200px; }
 
+/* image list (resizer) */
+.img-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.img-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding: 10px 14px 10px 10px;
+}
+
+.img-thumb {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 9px;
+  background: var(--track);
+  flex: none;
+}
+
+.img-info { flex: 1; min-width: 0; }
+
+.img-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.img-detail {
+  font-size: 12.5px;
+  color: var(--text-sub);
+  font-variant-numeric: tabular-nums;
+}
+
+.img-badges { margin-top: 3px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 9px;
+  border-radius: 99px;
+}
+
+.badge-ok { color: var(--green-deep); background: var(--green-tint); }
+.badge-warn { color: var(--warn); background: var(--warn-bg); }
+
+.btn-mini {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: 9px;
+  flex: none;
+}
+
 /* guide */
 .guide ul {
   margin: 0;
