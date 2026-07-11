@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>금칙어 검사 — 블로그 위험 표현 체크 | 블로그 도구함</title>
+<meta name="description" content="블로그 글에서 의료법·표시광고법 위반 소지가 있는 과장 표현과 위험 단어를 찾아 하이라이트합니다.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚨</text></svg>">
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="./">🧰 블로그 도구함</a>
+    <nav class="site-nav">
+      <a href="gif-maker.html">GIF</a>
+      <a href="image-resizer.html">리사이즈</a>
+      <a href="thumbnail-maker.html">썸네일</a>
+      <a href="char-counter.html">글자 수</a>
+      <a href="word-checker.html">금칙어</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container tool-page">
+  <div class="tool-title">
+    <h1>🚨 금칙어 검사</h1>
+    <p>글을 붙여넣으면 <strong>의료법·표시광고법 위반 소지</strong>가 있는 과장 표현이나 광고성 위험 단어를 찾아 표시해요. 체험단·협찬 글 올리기 전에 한 번 돌려보세요.</p>
+  </div>
+
+  <section class="panel">
+    <h2><span class="step-num">1</span> 글 붙여넣기</h2>
+    <textarea id="textInput" class="counter-textarea" placeholder="검사할 글을 붙여넣으세요…" spellcheck="false"></textarea>
+    <div style="margin-top:16px">
+      <button class="btn btn-primary btn-lg" id="checkBtn" type="button">🔍 검사하기</button>
+    </div>
+  </section>
+
+  <section class="panel hidden" id="panel-result">
+    <h2><span class="step-num">2</span> 검사 결과</h2>
+    <div class="result-verdict" id="resultVerdict"></div>
+    <div class="check-cats" id="checkCats"></div>
+    <div class="check-preview" id="checkPreview"></div>
+  </section>
+
+  <section class="panel guide">
+    <h2>💡 왜 걸리는 표현인가요?</h2>
+    <ul>
+      <li><strong>효능 단정 (의료법·식품표시광고법)</strong> — "완치", "치료 효과", "부작용 없음" 같은 표현은 일반 식품·화장품·시술 후기에 쓰면 법 위반 소지가 있어요. "~에 도움이 될 수 있다" 정도로 순화하세요.</li>
+      <li><strong>최상급·단정 표현 (표시광고법)</strong> — "최고", "1위", "유일"은 객관적 근거를 실증할 수 있어야 해요. 근거 없이 쓰면 과장광고가 됩니다.</li>
+      <li><strong>협찬 표기</strong> — 대가를 받은 글에는 "협찬/광고" 표기가 의무예요(공정위 추천보증심사지침). 빠뜨리면 블로거도 제재 대상이 될 수 있어요.</li>
+      <li><strong>참고용이에요</strong> — 이 검사는 네이버 공식 기준이 아니라 일반적으로 알려진 위험 표현 사전 기준이에요. 걸렸다고 반드시 문제가 되는 것도, 안 걸렸다고 안전한 것도 아닙니다.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>모든 처리는 브라우저 안에서만 이루어지며 글이 외부로 전송되지 않습니다.</p>
+  </div>
+</footer>
+
+<script type="module" src="assets/js/word-checker.js"></script>
+</body>
+</html>

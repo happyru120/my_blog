@@ -1,13 +1,13 @@
 // 영상 → GIF 변환기 (네이버 블로그 기준 자동 압축)
 // 모든 처리는 브라우저 안에서만 이루어진다.
 
+import { $, formatSize, formatTime, initDropZone, createProgress } from './utils.js';
+
 const NAVER_LIMIT = 10 * 1024 * 1024;      // 네이버 블로그 GIF 용량 제한 10MB
 const NAVER_MAX_WIDTH = 966;               // 본문 최대 폭 — 초과 시 네이버가 재변환하며 움직임이 사라질 수 있음
 const SIZE_TARGET = NAVER_LIMIT * 0.97;    // 안전 여유분을 둔 압축 목표
 const MAX_FRAMES = 240;                    // 메모리 보호용 프레임 상한
 const MAX_ATTEMPTS = 6;                    // 자동 압축 재시도 횟수
-
-const $ = (id) => document.getElementById(id);
 
 const els = {
   dropZone: $('dropZone'),
@@ -30,10 +30,6 @@ const els = {
   optSpeed: $('optSpeed'),
   optAutoCompress: $('optAutoCompress'),
   makeBtn: $('makeBtn'),
-  progressWrap: $('progressWrap'),
-  progressLabel: $('progressLabel'),
-  progressPct: $('progressPct'),
-  progressBarFill: $('progressBarFill'),
   resultImg: $('resultImg'),
   resultVerdict: $('resultVerdict'),
   statSize: $('statSize'),
@@ -49,32 +45,19 @@ const els = {
 let currentFile = null;
 let videoURL = null;
 let resultURL = null;
+let busy = false; // 변환 중 파일 교체 방지
+
+const progress = createProgress();
 
 /* ---------------- 파일 선택 ---------------- */
 
-els.dropZone.addEventListener('click', () => els.fileInput.click());
-els.fileInput.addEventListener('change', () => {
-  if (els.fileInput.files.length) loadVideo(els.fileInput.files[0]);
-});
-
-['dragover', 'dragenter'].forEach((ev) =>
-  els.dropZone.addEventListener(ev, (e) => {
-    e.preventDefault();
-    els.dropZone.classList.add('dragover');
-  })
-);
-['dragleave', 'drop'].forEach((ev) =>
-  els.dropZone.addEventListener(ev, (e) => {
-    e.preventDefault();
-    els.dropZone.classList.remove('dragover');
-  })
-);
-els.dropZone.addEventListener('drop', (e) => {
-  const file = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (file) loadVideo(file);
-});
+initDropZone(els.dropZone, els.fileInput, (files) => loadVideo(files[0]));
 
 function loadVideo(file) {
+  if (busy) {
+    alert('지금 GIF를 만드는 중이에요. 끝난 뒤에 새 영상을 올려 주세요.');
+    return;
+  }
   if (!file.type.startsWith('video/') && !/\.(mp4|webm|mov|m4v)$/i.test(file.name)) {
     alert('영상 파일을 선택해 주세요. (MP4, WebM, MOV 등)');
     return;
@@ -147,19 +130,23 @@ function updateTrimUI() {
   }
 }
 
+let previewHandler = null; // 이전 미리 재생 리스너가 쌓이지 않게 관리
+
 els.previewRangeBtn.addEventListener('click', () => {
   const video = els.video;
   const start = +els.trimStart.value;
   const end = +els.trimEnd.value;
+  if (previewHandler) video.removeEventListener('timeupdate', previewHandler);
   video.currentTime = start;
   video.play();
-  const onTime = () => {
+  previewHandler = () => {
     if (video.currentTime >= end) {
       video.pause();
-      video.removeEventListener('timeupdate', onTime);
+      video.removeEventListener('timeupdate', previewHandler);
+      previewHandler = null;
     }
   };
-  video.addEventListener('timeupdate', onTime);
+  video.addEventListener('timeupdate', previewHandler);
 });
 
 /* ---------------- GIF 생성 ---------------- */
@@ -182,21 +169,24 @@ async function makeGif() {
   const requestedWidth = Math.min(+els.optWidth.value, NAVER_MAX_WIDTH, video.videoWidth);
 
   els.makeBtn.disabled = true;
+  busy = true;
   els.panelResult.classList.add('hidden');
-  showProgress('영상에서 프레임을 추출하는 중…', 0);
+  progress.show('영상에서 프레임을 추출하는 중…', 0);
 
   try {
     video.pause();
 
-    // 출력 GIF 기준 프레임 수. 상한을 넘으면 FPS를 자동으로 낮춰서 맞춘다.
+    // 출력 GIF 기준 프레임 수. 상한을 넘으면 FPS를 낮추되 선택 구간 전체를 항상 담는다.
     const clipDur = (end - start) / speed;
     let fps = userFps;
-    if (Math.ceil(clipDur * fps) > MAX_FRAMES) {
-      fps = Math.max(4, Math.floor(MAX_FRAMES / clipDur));
+    let fpsAdjusted = false;
+    if (clipDur * fps > MAX_FRAMES) {
+      fps = MAX_FRAMES / clipDur; // 소수 fps 허용 — 프레임 간격을 늘려 구간을 자르지 않는다
+      fpsAdjusted = true;
     }
 
     const frames = await captureFrames(video, start, end, fps, speed, requestedWidth, (done, total) => {
-      showProgress(`영상에서 프레임을 추출하는 중… (${done}/${total})`, (done / total) * 50);
+      progress.show(`영상에서 프레임을 추출하는 중… (${done}/${total})`, (done / total) * 50);
     });
 
     if (!frames.length) throw new Error('프레임을 추출하지 못했어요.');
@@ -217,21 +207,25 @@ async function makeGif() {
         : `10MB에 맞게 다시 압축하는 중… (${attempt}번째 시도)`;
 
       result = await encodeAttempt(frames, baseW, baseH, baseDelay, settings, (p) => {
-        showProgress(label, 50 + p * 50);
+        progress.show(label, 50 + p * 50);
       });
 
       if (!autoCompress || result.size <= SIZE_TARGET || attempt >= MAX_ATTEMPTS) break;
 
-      settings = nextSettings(settings, result.size, SIZE_TARGET);
+      const next = nextSettings(settings, result.size, SIZE_TARGET);
+      // 더 줄일 수 있는 설정이 없으면 같은 결과를 반복 인코딩하지 않고 종료
+      if (next.scale === settings.scale && next.colors === settings.colors && next.frameSkip === settings.frameSkip) break;
+      settings = next;
     }
 
-    showResult(result, fps);
+    showResult(result, fpsAdjusted ? fps : null);
   } catch (err) {
     console.error(err);
     alert('GIF를 만드는 중 문제가 생겼어요: ' + (err && err.message ? err.message : err));
   } finally {
     els.makeBtn.disabled = false;
-    hideProgress();
+    busy = false;
+    progress.hide();
   }
 }
 
@@ -271,7 +265,7 @@ function seekTo(video, t) {
       clearTimeout(timer);
       resolve();
     };
-    const timer = setTimeout(finish, 2000); // seeked가 안 오는 브라우저 대비
+    const timer = setTimeout(finish, 5000); // seeked가 안 오는 브라우저 대비 (고해상도 디코딩 여유 포함)
     video.addEventListener('seeked', finish);
     video.currentTime = Math.min(t, Math.max(0, video.duration - 0.001));
   });
@@ -352,8 +346,8 @@ function nextSettings(cur, size, target) {
     if (over < 1.25) return next;
   }
 
-  // GIF 용량은 대략 픽셀 수에 비례하므로 넓이 비율의 제곱근만큼 줄인다.
-  next.scale = Math.max(0.3, next.scale * Math.min(0.92, Math.sqrt(target / size)));
+  // GIF 용량은 대략 픽셀 수에 비례 — 직전 인코딩의 실측 크기로 목표 크기를 예측해 한 번에 줄인다.
+  next.scale = Math.max(0.3, next.scale * Math.sqrt(target / size) * 0.95);
 
   // 그래도 많이 초과하면 프레임을 절반으로 (재생 속도는 delay를 늘려 유지)
   if (over > 2.4 && next.frameSkip === 1) next.frameSkip = 2;
@@ -363,30 +357,37 @@ function nextSettings(cur, size, target) {
 
 /* ---------------- 결과 표시 ---------------- */
 
-function showResult(result, fps) {
+function showResult(result, adjustedFps) {
   if (resultURL) URL.revokeObjectURL(resultURL);
   resultURL = URL.createObjectURL(result.blob);
 
+  const sizeStr = formatSize(result.size);
+  const usedPct = Math.round((result.size / NAVER_LIMIT) * 100);
+
   els.resultImg.src = resultURL;
-  els.statSize.textContent = formatSize(result.size);
+  els.statSize.textContent = sizeStr;
   els.statSize.className = 'stat-value ' + (result.size <= NAVER_LIMIT ? 'size-ok' : 'size-over');
   els.statDim.textContent = `${result.width}×${result.height}`;
   els.statLen.textContent = formatTime((result.frameCount * result.delay) / 1000);
   els.statFrames.textContent = `${result.frameCount}장 · ${Math.round(1000 / result.delay)}fps`;
 
-  const usedPct = Math.min(100, (result.size / NAVER_LIMIT) * 100);
   els.sizeGaugeFill.style.width = '0%';
-  requestAnimationFrame(() => { els.sizeGaugeFill.style.width = usedPct + '%'; });
+  requestAnimationFrame(() => { els.sizeGaugeFill.style.width = Math.min(100, usedPct) + '%'; });
   els.sizeGaugeFill.classList.toggle('over', result.size > NAVER_LIMIT);
-  els.sizeGaugeUsed.textContent = `${formatSize(result.size)} 사용 (${Math.round((result.size / NAVER_LIMIT) * 100)}%)`;
+  els.sizeGaugeUsed.textContent = `${sizeStr} 사용 (${usedPct}%)`;
+
+  // 구간이 길어 FPS를 자동으로 낮췄다면 사용자에게 알린다
+  const fpsNote = adjustedFps
+    ? ` · 구간이 길어 초당 프레임을 ${Math.round(1000 / result.delay)}fps로 낮춰 전체 구간을 담았어요.`
+    : '';
 
   const verdict = els.resultVerdict;
   if (result.size <= NAVER_LIMIT) {
     verdict.className = 'result-verdict ok';
-    verdict.textContent = `✅ 네이버 블로그에 올릴 수 있어요! (10MB 제한 중 ${formatSize(result.size)} 사용)`;
+    verdict.textContent = `✅ 네이버 블로그에 올릴 수 있어요! (10MB 제한 중 ${sizeStr} 사용)${fpsNote}`;
   } else {
     verdict.className = 'result-verdict over';
-    verdict.textContent = `⚠ 10MB를 초과했어요 (${formatSize(result.size)}). 구간을 더 짧게 하거나 가로 크기·FPS를 낮춰 보세요.`;
+    verdict.textContent = `⚠ 10MB를 초과했어요 (${sizeStr}). 구간을 더 짧게 하거나 가로 크기·FPS를 낮춰 보세요.${fpsNote}`;
   }
 
   const base = currentFile ? currentFile.name.replace(/\.[^.]+$/, '') : 'naver-blog';
@@ -397,36 +398,8 @@ function showResult(result, fps) {
   els.panelResult.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-/* ---------------- 진행률 & 유틸 ---------------- */
-
-function showProgress(label, pct) {
-  els.progressWrap.classList.remove('hidden');
-  els.progressLabel.textContent = label;
-  const v = Math.min(100, Math.round(pct));
-  els.progressPct.textContent = `${v}%`;
-  els.progressBarFill.style.width = `${v}%`;
-}
-
-function hideProgress() {
-  els.progressWrap.classList.add('hidden');
-  els.progressBarFill.style.width = '0%';
-}
+/* ---------------- 유틸 ---------------- */
 
 function evenize(n) {
   return n % 2 === 0 ? n : n - 1;
-}
-
-function formatSize(bytes) {
-  if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + 'MB';
-  if (bytes >= 1024) return Math.round(bytes / 1024) + 'KB';
-  return bytes + 'B';
-}
-
-function formatTime(sec) {
-  if (sec >= 60) {
-    const m = Math.floor(sec / 60);
-    const s = sec - m * 60;
-    return `${m}분 ${s.toFixed(1)}초`;
-  }
-  return `${sec.toFixed(1)}초`;
 }

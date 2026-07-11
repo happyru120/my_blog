@@ -9,8 +9,9 @@
 | --- | --- | --- |
 | 🎬 [영상 → GIF 변환기](gif-maker.html) | ✅ 사용 가능 | 영상 구간을 잘라 GIF로 만들고 네이버 블로그 기준에 맞게 자동 압축 |
 | 🖼️ [이미지 리사이즈](image-resizer.html) | ✅ 사용 가능 | 본문 폭(966px) 일괄 리사이즈 + GPS 위치정보 제거 + 워터마크 |
-| ✂️ 썸네일 메이커 | 준비 중 | 1:1 대표 이미지 제작 |
-| 🔤 글자 수 세기 | 준비 중 | 공백 포함/제외 글자 수 |
+| ✂️ [썸네일 메이커](thumbnail-maker.html) | ✅ 사용 가능 | 1:1(800×800) 대표 이미지 제작 — 사진 배치·확대, 제목 텍스트, 어둡게 필터 |
+| 🔤 [글자 수 세기](char-counter.html) | ✅ 사용 가능 | 공백 포함/제외·단어·원고지·읽는 시간, 목표 달성률, 자동 저장 |
+| 🚨 [금칙어 검사](word-checker.html) | ✅ 사용 가능 | 의료법·표시광고법 위험 표현 하이라이트 + 협찬 표기 점검 |
 
 ## 영상 → GIF 변환기
 
@@ -45,7 +46,8 @@ GitHub Pages 배포: 저장소 Settings → Pages → Branch를 배포할 브랜
 
 ## 기술 구조
 
-- 순수 HTML/CSS/JS — 빌드 도구, 프레임워크, 외부 CDN 없음
+- 순수 HTML/CSS/JS — 빌드 도구·프레임워크 없음 (폰트만 CDN에서 로드, 실패 시 시스템 폰트 폴백)
 - GIF 인코딩: [gifenc](https://github.com/mattdesl/gifenc) (MIT, `assets/js/gifenc.esm.js`로 포함)
-- 프레임 추출: `<video>` + `<canvas>` seek 캡처
-- 인코딩은 Web Worker에서 실행되어 UI가 멈추지 않음
+- 프레임 추출: `<video>` + `<canvas>` seek 캡처, 인코딩은 Web Worker에서 실행
+- ZIP 저장: 외부 라이브러리 없는 store 방식 생성기 (`assets/js/mini-zip.js`)
+- 공용 유틸(`assets/js/utils.js`): 드롭존 배선, 진행률 표시, 크기/시간 포맷

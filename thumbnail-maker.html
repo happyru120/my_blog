@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>썸네일 메이커 — 네이버 블로그 대표 이미지 제작 | 블로그 도구함</title>
+<meta name="description" content="네이버 블로그 대표 이미지 규격(1:1, 800×800)에 맞는 썸네일을 만듭니다. 사진 위에 제목을 얹고 바로 저장하세요.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>">
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="./">🧰 블로그 도구함</a>
+    <nav class="site-nav">
+      <a href="gif-maker.html">GIF</a>
+      <a href="image-resizer.html">리사이즈</a>
+      <a href="thumbnail-maker.html">썸네일</a>
+      <a href="char-counter.html">글자 수</a>
+      <a href="word-checker.html">금칙어</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container tool-page">
+  <div class="tool-title">
+    <h1>✂️ 썸네일 메이커</h1>
+    <p>네이버 블로그 대표 이미지는 목록에서 <strong>1:1 정사각형</strong>으로 잘려 보여요. 규격(800×800)에 딱 맞는 썸네일을 만들고 제목을 얹어 저장하세요.</p>
+  </div>
+
+  <section class="panel">
+    <h2><span class="step-num">1</span> 배경 만들기</h2>
+    <div class="thumb-layout">
+      <div class="thumb-canvas-wrap">
+        <canvas id="canvas" width="800" height="800"></canvas>
+        <p class="hint" style="text-align:center;margin-top:8px">사진을 드래그해서 위치를 옮길 수 있어요</p>
+      </div>
+      <div class="thumb-controls">
+        <div class="setting">
+          <label>배경 사진</label>
+          <button class="btn btn-secondary w-full" id="pickImageBtn" type="button">📸 사진 불러오기</button>
+          <input type="file" id="fileInput" accept="image/*" class="hidden">
+        </div>
+        <div class="setting">
+          <label for="zoomRange">사진 확대</label>
+          <input type="range" id="zoomRange" min="1" max="3" step="0.01" value="1" disabled>
+        </div>
+        <div class="setting">
+          <label for="dimRange">어둡게 (글자 잘 보이게)</label>
+          <input type="range" id="dimRange" min="0" max="70" step="1" value="25">
+        </div>
+        <div class="setting">
+          <label for="bgColor">배경색 (사진 없을 때)</label>
+          <input type="color" id="bgColor" class="input-color" value="#03c75a">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="step-num">2</span> 글자 얹기</h2>
+    <div class="settings-grid">
+      <div class="setting" style="grid-column:1/-1">
+        <label for="titleText">제목 (줄바꿈 가능)</label>
+        <textarea id="titleText" rows="2" class="thumb-title-input" placeholder="서울 카페 추천&#10;분위기 좋은 곳 5선">서울 카페 추천
+분위기 좋은 곳 5선</textarea>
+      </div>
+      <div class="setting">
+        <label for="fontSize">글자 크기</label>
+        <input type="range" id="fontSize" min="30" max="110" step="1" value="64">
+      </div>
+      <div class="setting">
+        <label for="textColor">글자색</label>
+        <input type="color" id="textColor" class="input-color" value="#ffffff">
+      </div>
+      <div class="setting">
+        <label for="textPos">글자 위치</label>
+        <select id="textPos">
+          <option value="c" selected>가운데</option>
+          <option value="t">위쪽</option>
+          <option value="b">아래쪽</option>
+        </select>
+      </div>
+      <div class="setting">
+        <label for="textStyle">글자 강조</label>
+        <select id="textStyle">
+          <option value="shadow" selected>그림자</option>
+          <option value="outline">외곽선</option>
+          <option value="box">반투명 배경</option>
+          <option value="none">없음</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="step-num">3</span> 저장</h2>
+    <div class="result-actions">
+      <button class="btn btn-primary" id="downloadBtn" type="button">⬇ 썸네일 저장 (800×800 JPG)</button>
+      <a class="btn btn-secondary" href="https://blog.naver.com/GoBlogWrite.naver" target="_blank" rel="noopener">✍ 네이버 블로그 글쓰기 열기</a>
+    </div>
+  </section>
+
+  <section class="panel guide">
+    <h2>💡 썸네일 잘 만드는 팁</h2>
+    <ul>
+      <li><strong>1:1 (800×800)</strong> — 네이버 블로그 목록·모바일 피드에서 대표 이미지는 정사각형으로 잘려요. 처음부터 1:1로 만들면 잘릴 걱정이 없어요.</li>
+      <li><strong>글자는 크고 짧게</strong> — 목록에서는 썸네일이 작게 보여요. 핵심 키워드 2줄이면 충분해요.</li>
+      <li><strong>어둡게 필터</strong> — 밝은 사진 위 흰 글자는 안 보여요. 20~40% 정도 어둡게 하면 또렷해져요.</li>
+      <li><strong>일관성</strong> — 같은 글자 위치·색을 유지하면 내 블로그만의 브랜드가 생겨요.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>모든 처리는 브라우저 안에서만 이루어지며 사진이 외부로 전송되지 않습니다.</p>
+  </div>
+</footer>
+
+<script type="module" src="assets/js/thumbnail-maker.js"></script>
+</body>
+</html>

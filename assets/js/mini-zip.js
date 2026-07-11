@@ -21,6 +21,15 @@ function crc32(bytes) {
 
 // entries: [{ name: string, data: Uint8Array }] → ZIP Blob
 export function createZip(entries) {
+  // ZIP64 미지원 포맷의 한계 — 초과 시 조용히 깨진 파일을 만들지 않도록 명시적으로 실패시킨다
+  if (entries.length > 0xffff) {
+    throw new Error(`파일이 너무 많아요 (최대 65,535개, 현재 ${entries.length}개)`);
+  }
+  const total = entries.reduce((s, e) => s + e.data.length, 0);
+  if (total > 0xffffffff) {
+    throw new Error('전체 용량이 4GB를 넘어 ZIP으로 묶을 수 없어요. 나눠서 저장해 주세요.');
+  }
+
   const enc = new TextEncoder();
   const parts = [];
   const central = [];

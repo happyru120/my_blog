@@ -2,10 +2,9 @@
 // 캔버스로 다시 인코딩하는 순간 EXIF(위치정보 포함)는 구조적으로 모두 사라진다.
 
 import { createZip } from './mini-zip.js';
+import { $, formatSize, initDropZone, createProgress } from './utils.js';
 
 const NAVER_WIDTH = 966;
-
-const $ = (id) => document.getElementById(id);
 
 const els = {
   dropZone: $('dropZone'),
@@ -19,10 +18,6 @@ const els = {
   optWmText: $('optWmText'),
   optWmPos: $('optWmPos'),
   convertBtn: $('convertBtn'),
-  progressWrap: $('progressWrap'),
-  progressLabel: $('progressLabel'),
-  progressPct: $('progressPct'),
-  progressBarFill: $('progressBarFill'),
   imgList: $('imgList'),
   listSummary: $('listSummary'),
   zipBtn: $('zipBtn'),
@@ -30,30 +25,14 @@ const els = {
   clearBtn: $('clearBtn'),
 };
 
-// { file, hadGps, el, thumbURL, result: {blob, url, name, outW, outH} | null }
+// { file, hadGps, gpsPromise, el, thumbURL, result: {blob, url, name, outW, outH} | null }
 let items = [];
+
+const progress = createProgress();
 
 /* ---------------- 파일 추가 ---------------- */
 
-els.dropZone.addEventListener('click', () => els.fileInput.click());
-els.fileInput.addEventListener('change', () => {
-  addFiles([...els.fileInput.files]);
-  els.fileInput.value = '';
-});
-
-['dragover', 'dragenter'].forEach((ev) =>
-  els.dropZone.addEventListener(ev, (e) => {
-    e.preventDefault();
-    els.dropZone.classList.add('dragover');
-  })
-);
-['dragleave', 'drop'].forEach((ev) =>
-  els.dropZone.addEventListener(ev, (e) => {
-    e.preventDefault();
-    els.dropZone.classList.remove('dragover');
-  })
-);
-els.dropZone.addEventListener('drop', (e) => addFiles([...e.dataTransfer.files]));
+initDropZone(els.dropZone, els.fileInput, addFiles);
 
 els.optWmOn.addEventListener('change', () => {
   els.optWmText.disabled = els.optWmPos.disabled = !els.optWmOn.checked;
@@ -71,7 +50,8 @@ async function addFiles(files) {
     const item = { file, hadGps: false, el: null, thumbURL: URL.createObjectURL(file), result: null };
     item.el = renderItem(item);
     items.push(item);
-    detectGps(file).then((has) => {
+    // 감지 결과를 배지에 반영하고, 변환 시 완료를 보장할 수 있게 프로미스를 보관
+    item.gpsPromise = detectGps(file).then((has) => {
       item.hadGps = has;
       updateItemBadges(item);
     });
@@ -116,7 +96,7 @@ els.convertBtn.addEventListener('click', convertAll);
 
 els.clearBtn.addEventListener('click', () => {
   items.forEach((it) => {
-    URL.revokeObjectURL(it.thumbURL);
+    if (it.thumbURL) URL.revokeObjectURL(it.thumbURL);
     if (it.result) URL.revokeObjectURL(it.result.url);
   });
   items = [];
@@ -132,6 +112,9 @@ async function convertAll() {
   if (!items.length) return;
   els.convertBtn.disabled = true;
 
+  // GPS 감지가 끝나기 전에 변환하면 '위치정보 제거' 집계가 빠질 수 있으므로 완료를 기다린다 (수 ms 수준)
+  await Promise.all(items.map((it) => it.gpsPromise));
+
   const maxWidth = +els.optWidth.value; // 0 = 원본 유지
   const format = els.optFormat.value;
   const quality = +els.optQuality.value;
@@ -143,8 +126,9 @@ async function convertAll() {
   let done = 0;
   let failed = 0;
   for (const item of items) {
-    showProgress(`변환 중… (${done + 1}/${items.length})`, (done / items.length) * 100);
+    progress.show(`변환 중… (${done + 1}/${items.length})`, (done / items.length) * 100);
     try {
+      if (item.result) URL.revokeObjectURL(item.result.url); // 재변환 시 이전 결과 URL 누수 방지
       item.result = await processImage(item.file, { maxWidth, format, quality, watermark });
       updateItemDone(item);
     } catch (err) {
@@ -154,8 +138,8 @@ async function convertAll() {
     }
     done++;
   }
-  showProgress('완료!', 100);
-  setTimeout(hideProgress, 600);
+  progress.show('완료!', 100);
+  setTimeout(() => progress.hide(), 600);
 
   const doneItems = items.filter((it) => it.result);
   const before = doneItems.reduce((s, it) => s + it.file.size, 0);
@@ -178,6 +162,10 @@ async function convertAll() {
 function updateItemDone(item) {
   const r = item.result;
   item.el.querySelector('.img-thumb').src = r.url;
+  if (item.thumbURL) { // 원본 미리보기 URL은 더 이상 필요 없으므로 해제
+    URL.revokeObjectURL(item.thumbURL);
+    item.thumbURL = null;
+  }
   item.el.querySelector('.img-detail').innerHTML =
     `${r.srcW}×${r.srcH} → <strong>${r.outW}×${r.outH}</strong> · ` +
     `${formatSize(item.file.size)} → <strong class="size-ok">${formatSize(r.blob.size)}</strong>`;
@@ -311,33 +299,19 @@ els.zipBtn.addEventListener('click', async () => {
     entries.push({ name, data: new Uint8Array(await it.result.blob.arrayBuffer()) });
   }
 
-  const zip = createZip(entries);
-  const url = URL.createObjectURL(zip);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `블로그사진_${entries.length}장.zip`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(url), 30000);
-  els.zipBtn.disabled = false;
+  try {
+    const zip = createZip(entries);
+    const url = URL.createObjectURL(zip);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `블로그사진_${entries.length}장.zip`;
+    a.click();
+    // 느린 연결에서도 다운로드가 끊기지 않게 넉넉히 뒤에 해제 (페이지를 닫으면 자동 해제됨)
+    setTimeout(() => URL.revokeObjectURL(url), 10 * 60 * 1000);
+  } catch (err) {
+    alert('ZIP을 만들지 못했어요: ' + (err && err.message ? err.message : err));
+  } finally {
+    els.zipBtn.disabled = false;
+  }
 });
 
-/* ---------------- 진행률 & 유틸 ---------------- */
-
-function showProgress(label, pct) {
-  els.progressWrap.classList.remove('hidden');
-  els.progressLabel.textContent = label;
-  const v = Math.min(100, Math.round(pct));
-  els.progressPct.textContent = `${v}%`;
-  els.progressBarFill.style.width = `${v}%`;
-}
-
-function hideProgress() {
-  els.progressWrap.classList.add('hidden');
-  els.progressBarFill.style.width = '0%';
-}
-
-function formatSize(bytes) {
-  if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + 'MB';
-  if (bytes >= 1024) return Math.round(bytes / 1024) + 'KB';
-  return bytes + 'B';
-}

@@ -21,7 +21,7 @@ self.onmessage = (e) => {
 
     gif.finish();
     const bytes = gif.bytes();
-    self.postMessage({ type: 'done', buffer: bytes.buffer, size: bytes.byteLength }, [bytes.buffer]);
+    self.postMessage({ type: 'done', buffer: bytes.buffer }, [bytes.buffer]);
   } catch (err) {
     self.postMessage({ type: 'error', message: err && err.message ? err.message : String(err) });
   }
