@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>영상 → GIF 변환기 — 네이버 블로그 기준 자동 압축 | 블로그 도구함</title>
+<meta name="description" content="영상을 잘라 GIF로 만들고 네이버 블로그 업로드 기준(10MB, 폭 966px)에 맞게 자동 압축합니다. 파일은 서버로 전송되지 않아요.">
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a class="logo" href="./">🧰 블로그 도구함</a>
+    <nav class="site-nav">
+      <a href="gif-maker.html">GIF 만들기</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container tool-page">
+  <div class="tool-title">
+    <h1>🎬 영상 → GIF 변환기</h1>
+    <p>영상에서 원하는 구간만 잘라 움짤(GIF)로 만들어요. 완성된 GIF는 네이버 블로그 업로드 기준(<strong>10MB 이하 · 폭 966px 이하</strong>)에 맞게 자동으로 압축됩니다. 모든 변환은 내 브라우저 안에서만 처리돼요.</p>
+  </div>
+
+  <!-- STEP 1: upload -->
+  <section class="panel" id="panel-upload">
+    <h2><span class="step-num">1</span> 영상 올리기</h2>
+    <div class="drop-zone" id="dropZone">
+      <div class="dz-icon">📂</div>
+      <p class="dz-main">영상 파일을 여기에 끌어다 놓거나 클릭해서 선택하세요</p>
+      <p>MP4 · WebM · MOV 등 브라우저에서 재생 가능한 영상</p>
+    </div>
+    <input type="file" id="fileInput" accept="video/*,.mov,.mp4,.webm,.m4v" class="hidden">
+  </section>
+
+  <!-- STEP 2: trim -->
+  <section class="panel hidden" id="panel-trim">
+    <h2><span class="step-num">2</span> 구간 자르기</h2>
+    <div class="video-wrap">
+      <video id="video" playsinline muted controls></video>
+      <div class="file-meta" id="fileMeta"></div>
+    </div>
+    <div class="trim-row">
+      <label for="trimStart">시작</label>
+      <input type="range" id="trimStart" min="0" max="0" step="0.1" value="0">
+      <span class="trim-time" id="trimStartLabel">0.0초</span>
+    </div>
+    <div class="trim-row">
+      <label for="trimEnd">끝</label>
+      <input type="range" id="trimEnd" min="0" max="0" step="0.1" value="0">
+      <span class="trim-time" id="trimEndLabel">0.0초</span>
+    </div>
+    <p class="trim-summary">선택 구간: <strong id="trimDuration">0.0초</strong> <span id="trimWarn" class="notice hidden"></span></p>
+    <button class="btn btn-secondary" id="previewRangeBtn" type="button">▶ 선택 구간 미리 재생</button>
+  </section>
+
+  <!-- STEP 3: settings -->
+  <section class="panel hidden" id="panel-settings">
+    <h2><span class="step-num">3</span> GIF 설정</h2>
+    <div class="settings-grid">
+      <div class="setting">
+        <label for="optWidth">가로 크기 (px)</label>
+        <select id="optWidth">
+          <option value="320">320px — 작게</option>
+          <option value="480" selected>480px — 권장</option>
+          <option value="640">640px — 크게</option>
+          <option value="800">800px — 더 크게</option>
+          <option value="966">966px — 본문 최대 폭</option>
+        </select>
+        <div class="hint">클수록 선명하지만 용량이 커져요.</div>
+      </div>
+      <div class="setting">
+        <label for="optFps">초당 프레임 (FPS)</label>
+        <select id="optFps">
+          <option value="8">8 — 용량 절약</option>
+          <option value="10">10</option>
+          <option value="12" selected>12 — 권장</option>
+          <option value="15">15 — 부드러움</option>
+          <option value="20">20 — 매우 부드러움</option>
+        </select>
+        <div class="hint">높을수록 부드럽지만 용량이 커져요.</div>
+      </div>
+      <div class="setting">
+        <label for="optColors">색상 수</label>
+        <select id="optColors">
+          <option value="256" selected>256색 — 최고 화질</option>
+          <option value="128">128색 — 균형</option>
+          <option value="64">64색 — 용량 절약</option>
+        </select>
+        <div class="hint">색이 단순한 영상은 줄여도 티가 잘 안 나요.</div>
+      </div>
+      <div class="setting">
+        <label for="optSpeed">재생 속도</label>
+        <select id="optSpeed">
+          <option value="0.5">0.5배 느리게</option>
+          <option value="1" selected>1배 (원본)</option>
+          <option value="1.5">1.5배 빠르게</option>
+          <option value="2">2배 빠르게</option>
+        </select>
+        <div class="hint">빠르게 하면 길이가 줄어 용량도 줄어요.</div>
+      </div>
+    </div>
+
+    <div class="checkbox-row">
+      <input type="checkbox" id="optAutoCompress" checked>
+      <div>
+        <label for="optAutoCompress" style="display:inline;font-size:14px;font-weight:700">네이버 블로그 기준(10MB)에 맞게 자동 압축</label>
+        <div class="hint">GIF가 10MB를 넘으면 색상 수·크기·FPS를 자동으로 조절해 10MB 아래로 맞춰요.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px">
+      <button class="btn btn-primary btn-lg" id="makeBtn" type="button">🎬 GIF 만들기</button>
+    </div>
+
+    <div class="progress-wrap hidden" id="progressWrap">
+      <div class="progress-label"><span id="progressLabel">준비 중…</span><span id="progressPct">0%</span></div>
+      <div class="progress-bar"><div id="progressBarFill"></div></div>
+    </div>
+  </section>
+
+  <!-- STEP 4: result -->
+  <section class="panel hidden" id="panel-result">
+    <h2><span class="step-num">4</span> 완성! 확인하고 저장하세요</h2>
+    <div class="result-preview"><img id="resultImg" alt="완성된 GIF 미리보기"></div>
+    <div class="result-verdict" id="resultVerdict"></div>
+    <div class="result-stats">
+      <div class="stat"><div class="stat-label">파일 크기</div><div class="stat-value" id="statSize">-</div></div>
+      <div class="stat"><div class="stat-label">크기 (px)</div><div class="stat-value" id="statDim">-</div></div>
+      <div class="stat"><div class="stat-label">길이</div><div class="stat-value" id="statLen">-</div></div>
+      <div class="stat"><div class="stat-label">프레임</div><div class="stat-value" id="statFrames">-</div></div>
+    </div>
+    <div class="result-actions">
+      <a class="btn btn-primary" id="downloadBtn" download>⬇ GIF 저장하기</a>
+      <a class="btn btn-secondary" href="https://blog.naver.com/GoBlogWrite.naver" target="_blank" rel="noopener">✍ 네이버 블로그 글쓰기 열기</a>
+      <button class="btn btn-secondary" id="retryBtn" type="button">↺ 설정 바꿔 다시 만들기</button>
+    </div>
+  </section>
+
+  <!-- guide -->
+  <section class="panel guide">
+    <h2>💡 네이버 블로그 GIF 업로드 기준</h2>
+    <ul>
+      <li><strong>용량 10MB 이하</strong> — GIF가 10MB를 넘으면 업로드가 실패하거나 움직이지 않는 이미지로 바뀔 수 있어요. 이 도구의 자동 압축을 켜두면 알아서 맞춰줍니다.</li>
+      <li><strong>가로 966px 이하 권장</strong> — 네이버 블로그 본문 최대 폭은 966px이에요. 이보다 크면 네이버가 이미지를 다시 변환하면서 GIF의 움직임이 사라질 수 있어요.</li>
+      <li><strong>업로드 방법</strong> — 완성된 GIF를 저장한 뒤, 블로그 글쓰기 화면에서 사진 첨부(📷)로 올리면 본문에서 자동 재생돼요.</li>
+      <li><strong>길이는 짧게</strong> — 움짤은 3~6초 구간이 가장 보기 좋아요. 길수록 용량 때문에 화질을 많이 포기해야 해요.</li>
+    </ul>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>모든 변환은 브라우저 안에서만 이루어지며 파일이 외부로 전송되지 않습니다.</p>
+  </div>
+</footer>
+
+<script type="module" src="assets/js/gif-maker.js"></script>
+</body>
+</html>
