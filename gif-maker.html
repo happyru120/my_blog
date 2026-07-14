@@ -41,25 +41,46 @@
     <input type="file" id="fileInput" accept="video/*,.mov,.mp4,.webm,.m4v" class="hidden">
   </section>
 
-  <!-- STEP 2: trim -->
+  <!-- STEP 2: 편집기 -->
   <section class="panel hidden" id="panel-trim">
-    <h2><span class="step-num">2</span> 구간 자르기</h2>
-    <div class="video-wrap">
-      <video id="video" playsinline muted controls></video>
-      <div class="file-meta" id="fileMeta"></div>
+    <h2><span class="step-num">2</span> 구간 고르기 <button class="btn btn-secondary btn-sm panel-action" id="changeVideoBtn" type="button" title="지금 영상을 지우고 새 영상을 올려요">↺ 다른 영상으로 바꾸기</button></h2>
+    <div class="editor-stage" id="editorStage">
+      <div class="stage-video">
+        <video id="video" playsinline muted></video>
+        <div class="file-meta" id="fileMeta"></div>
+      </div>
+
+      <div class="stage-controls">
+        <div class="transport">
+          <button class="t-btn" id="jumpStartBtn" type="button" title="구간 시작으로 (Home)">⏮</button>
+          <button class="t-btn t-wide" id="frameBackBtn" type="button" title="한 프레임 뒤로 (←)">◀ 1컷</button>
+          <button class="t-btn t-play" id="playBtn" type="button" title="선택 구간 재생/멈춤 (Space)" aria-label="재생">▶</button>
+          <button class="t-btn t-wide" id="frameFwdBtn" type="button" title="한 프레임 앞으로 (→)">1컷 ▶</button>
+          <button class="t-btn t-wide active" id="loopBtn" type="button" title="구간 반복 재생 켜기/끄기">🔁 반복</button>
+          <div class="t-time"><span id="curTime">0.0초</span><span class="t-sep">/</span><span id="totalTime">0.0초</span></div>
+        </div>
+
+        <div class="timeline" id="timeline">
+          <canvas class="tl-canvas" id="tlCanvas"></canvas>
+          <div class="tl-dim" id="tlDimL"></div>
+          <div class="tl-dim" id="tlDimR"></div>
+          <div class="tl-selection" id="tlSelection">
+            <div class="tl-handle tl-handle-l" id="tlHandleL"><span></span></div>
+            <div class="tl-handle tl-handle-r" id="tlHandleR"><span></span></div>
+          </div>
+          <div class="tl-playhead" id="tlPlayhead"></div>
+        </div>
+        <p class="tl-help">필름지를 누르거나 드래그해 장면을 찾고, 양쪽 초록 손잡이로 구간을 조절하세요. 가운데를 잡으면 통째로 옮겨져요.</p>
+
+        <div class="range-actions">
+          <button class="btn btn-secondary btn-sm" id="setStartBtn" type="button" title="지금 보이는 장면을 구간 시작으로 (단축키 [ )">[ 시작을 여기로</button>
+          <button class="btn btn-secondary btn-sm" id="setEndBtn" type="button" title="지금 보이는 장면을 구간 끝으로 (단축키 ] )">끝을 여기로 ]</button>
+          <span class="trim-summary">선택 구간 <strong id="selRangeLabel">-</strong> · 길이 <strong id="trimDuration">0.0초</strong></span>
+        </div>
+      </div>
     </div>
-    <div class="trim-row">
-      <label for="trimStart">시작</label>
-      <input type="range" id="trimStart" min="0" max="0" step="0.1" value="0">
-      <span class="trim-time" id="trimStartLabel">0.0초</span>
-    </div>
-    <div class="trim-row">
-      <label for="trimEnd">끝</label>
-      <input type="range" id="trimEnd" min="0" max="0" step="0.1" value="0">
-      <span class="trim-time" id="trimEndLabel">0.0초</span>
-    </div>
-    <p class="trim-summary">선택 구간: <strong id="trimDuration">0.0초</strong> <span id="trimWarn" class="notice hidden"></span></p>
-    <button class="btn btn-secondary" id="previewRangeBtn" type="button">▶ 선택 구간 미리 재생</button>
+    <p id="trimWarn" class="notice hidden"></p>
+    <p class="kbd-hints"><kbd>Space</kbd> 재생/멈춤 · <kbd>←</kbd> <kbd>→</kbd> 한 프레임 · <kbd>Shift</kbd>+<kbd>←→</kbd> 1초 이동 · <kbd>[</kbd> 시작 지정 · <kbd>]</kbd> 끝 지정</p>
   </section>
 
   <!-- STEP 3: settings -->
@@ -105,7 +126,7 @@
           <option value="1.5">1.5배 빠르게</option>
           <option value="2">2배 빠르게</option>
         </select>
-        <div class="hint">빠르게 하면 길이가 줄어 용량도 줄어요.</div>
+        <div class="hint">빠르게 하면 길이가 줄어 용량도 줄어요. 위 미리보기에도 바로 적용돼요.</div>
       </div>
     </div>
 

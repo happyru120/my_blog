@@ -445,6 +445,262 @@ input[type="range"]::-moz-range-thumb {
 
 .trim-summary strong { color: var(--green-deep); font-size: 15px; }
 
+/* ---------- GIF 편집기: 다크 스테이지 (미리보기 + 트랜스포트 + 타임라인) ---------- */
+
+.editor-stage {
+  margin-top: 4px;
+  padding: 18px;
+  border-radius: 16px;
+  background: #141817;
+  border: 1px solid rgba(255, 255, 255, .07);
+}
+
+.stage-video { text-align: center; }
+
+.stage-video video {
+  display: inline-block;
+  max-width: 100%;
+  max-height: 300px;
+  border-radius: 12px;
+  background: #000;
+  cursor: pointer;
+}
+
+.stage-video .file-meta {
+  color: #8b9691;
+  font-size: 12.5px;
+  margin-top: 8px;
+}
+
+/* 세로 영상 + 넓은 화면: 미리보기를 왼쪽에 붙여 타임라인과 나란히 —
+   재생하면서 바로 구간을 조절할 수 있다 */
+@media (min-width: 860px) {
+  .editor-stage.stage-portrait {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 6px 22px;
+    align-items: center;
+  }
+  .stage-portrait .stage-video video { max-height: 400px; }
+}
+
+.transport {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.t-btn {
+  height: 42px;
+  min-width: 42px;
+  padding: 0 10px;
+  border-radius: 12px;
+  border: 1.5px solid #333d39;
+  background: #1e2523;
+  color: #eef3f0;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background .15s, border-color .15s, transform .1s;
+}
+
+.t-btn:hover { background: #29322f; }
+.t-btn:active { transform: scale(.94); }
+
+.t-btn.active {
+  background: rgba(15, 215, 107, .16);
+  border-color: #0fd76b;
+  color: #7defab;
+}
+
+.t-play {
+  width: 54px;
+  height: 54px;
+  min-width: 54px;
+  border-radius: 50%;
+  background: #03c75a;
+  border-color: #03c75a;
+  color: #fff;
+  font-size: 19px;
+  padding: 0;
+}
+
+.t-play:hover { background: #0fd76b; border-color: #0fd76b; }
+
+.t-time {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #8b9691;
+  white-space: nowrap;
+}
+
+.t-time #curTime { color: #fff; font-size: 15px; }
+.t-sep { margin: 0 6px; opacity: .5; }
+
+.timeline {
+  position: relative;
+  height: 68px;
+  margin-top: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0c100f;
+  border: 1px solid rgba(255, 255, 255, .08);
+  cursor: crosshair;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.tl-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.tl-dim {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(8, 12, 10, .55);
+  pointer-events: none;
+}
+
+#tlDimL { left: 0; }
+
+.tl-selection {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-top: 3px solid var(--green);
+  border-bottom: 3px solid var(--green);
+  cursor: grab;
+}
+
+.tl-selection:active { cursor: grabbing; }
+
+.tl-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  background: var(--green);
+  cursor: ew-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.tl-handle-l { left: 0; border-radius: 10px 0 0 10px; }
+.tl-handle-r { right: 0; border-radius: 0 10px 10px 0; }
+
+/* 터치에서도 잡기 쉽게 히트 영역 확장 */
+.tl-handle::after {
+  content: '';
+  position: absolute;
+  inset: -8px -12px;
+}
+
+.tl-handle span {
+  width: 6px;
+  height: 20px;
+  border-left: 2px solid rgba(255, 255, 255, .9);
+  border-right: 2px solid rgba(255, 255, 255, .9);
+  border-radius: 1px;
+}
+
+.tl-playhead {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .45);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.tl-playhead::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top: 8px solid #fff;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .4));
+}
+
+.tl-help {
+  margin: 10px 2px 0;
+  font-size: 12.5px;
+  color: #8b9691;
+}
+
+.range-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.range-actions .trim-summary { margin: 0 0 0 auto; color: #8b9691; }
+.range-actions .trim-summary strong { color: #67eca4; }
+
+.range-actions .btn-secondary {
+  background: #1e2523;
+  border-color: #333d39;
+  color: #eef3f0;
+}
+
+.range-actions .btn-secondary:hover { background: #29322f; }
+
+.btn-sm { padding: 9px 14px; font-size: 13px; }
+
+.panel-action { margin-left: auto; font-weight: 600; }
+
+.kbd-hints {
+  margin: 14px 2px 0;
+  font-size: 12.5px;
+  color: var(--text-sub);
+}
+
+.kbd-hints kbd {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+@media (hover: none) {
+  .kbd-hints { display: none; }
+}
+
+@media (max-width: 560px) {
+  .t-time { width: 100%; margin-left: 2px; order: 9; }
+  .range-actions .trim-summary { margin-left: 2px; width: 100%; }
+}
+
 /* settings */
 .settings-grid {
   display: grid;

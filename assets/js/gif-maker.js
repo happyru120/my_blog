@@ -8,6 +8,8 @@ const NAVER_MAX_WIDTH = 966;               // 본문 최대 폭 — 초과 시 �
 const SIZE_TARGET = NAVER_LIMIT * 0.97;    // 안전 여유분을 둔 압축 목표
 const MAX_FRAMES = 240;                    // 메모리 보호용 프레임 상한
 const MAX_ATTEMPTS = 6;                    // 자동 압축 재시도 횟수
+const MIN_GAP = 0.1;                       // 시작·끝 사이 최소 간격 (초)
+const THUMB_COUNT = 24;                    // 타임라인 필름스트립 썸네일 수
 
 const els = {
   dropZone: $('dropZone'),
@@ -17,13 +19,28 @@ const els = {
   panelTrim: $('panel-trim'),
   panelSettings: $('panel-settings'),
   panelResult: $('panel-result'),
-  trimStart: $('trimStart'),
-  trimEnd: $('trimEnd'),
-  trimStartLabel: $('trimStartLabel'),
-  trimEndLabel: $('trimEndLabel'),
+  editorStage: $('editorStage'),
+  timeline: $('timeline'),
+  tlCanvas: $('tlCanvas'),
+  tlDimL: $('tlDimL'),
+  tlDimR: $('tlDimR'),
+  tlSelection: $('tlSelection'),
+  tlHandleL: $('tlHandleL'),
+  tlHandleR: $('tlHandleR'),
+  tlPlayhead: $('tlPlayhead'),
+  playBtn: $('playBtn'),
+  loopBtn: $('loopBtn'),
+  jumpStartBtn: $('jumpStartBtn'),
+  frameBackBtn: $('frameBackBtn'),
+  frameFwdBtn: $('frameFwdBtn'),
+  setStartBtn: $('setStartBtn'),
+  setEndBtn: $('setEndBtn'),
+  changeVideoBtn: $('changeVideoBtn'),
+  curTime: $('curTime'),
+  totalTime: $('totalTime'),
+  selRangeLabel: $('selRangeLabel'),
   trimDuration: $('trimDuration'),
   trimWarn: $('trimWarn'),
-  previewRangeBtn: $('previewRangeBtn'),
   optWidth: $('optWidth'),
   optFps: $('optFps'),
   optColors: $('optColors'),
@@ -45,9 +62,15 @@ const els = {
 let currentFile = null;
 let videoURL = null;
 let resultURL = null;
-let busy = false; // 변환 중 파일 교체 방지
+let busy = false; // 변환 중 편집·파일 교체 방지
+
+// 편집기 상태: 선택 구간과 재생 모드
+const edit = { dur: 0, start: 0, end: 0, loop: true };
+let thumbToken = 0;     // 파일 교체 시 진행 중인 썸네일 생성을 무효화
+let thumbBitmaps = [];  // 필름스트립 썸네일 (고정 개수, 리사이즈 시 다시 그림)
 
 const progress = createProgress();
+const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
 /* ---------------- 파일 선택 ---------------- */
 
@@ -75,19 +98,25 @@ function loadVideo(file) {
       alert('이 영상은 브라우저에서 재생할 수 없는 형식이에요. MP4(H.264) 파일을 권장합니다.');
       return;
     }
-    const dur = video.duration;
-    els.trimStart.max = els.trimEnd.max = dur.toFixed(1);
-    els.trimStart.value = 0;
-    els.trimEnd.value = Math.min(dur, 6).toFixed(1); // 움짤은 짧게가 기본
-    updateTrimUI();
+    edit.dur = video.duration;
+    edit.start = 0;
+    edit.end = Math.min(edit.dur, 6); // 움짤은 짧게가 기본
+    video.playbackRate = +els.optSpeed.value;
 
+    // 세로 영상은 넓은 화면에서 미리보기·타임라인을 좌우로 배치
+    els.editorStage.classList.toggle('stage-portrait', video.videoHeight > video.videoWidth);
+
+    els.totalTime.textContent = formatTime(edit.dur);
     els.fileMeta.textContent =
-      `${file.name} · ${video.videoWidth}×${video.videoHeight} · ${formatTime(dur)} · ${formatSize(file.size)}`;
+      `${file.name} · ${video.videoWidth}×${video.videoHeight} · ${formatTime(edit.dur)} · ${formatSize(file.size)}`;
 
     els.panelTrim.classList.remove('hidden');
     els.panelSettings.classList.remove('hidden');
     els.panelResult.classList.add('hidden');
     els.panelTrim.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    updateEditorUI();
+    buildThumbnails();
   };
 
   video.onerror = () => {
@@ -95,30 +124,131 @@ function loadVideo(file) {
   };
 }
 
-/* ---------------- 구간 자르기 ---------------- */
-
-els.trimStart.addEventListener('input', () => {
-  if (+els.trimStart.value >= +els.trimEnd.value) {
-    els.trimStart.value = Math.max(0, +els.trimEnd.value - 0.1).toFixed(1);
+// 지금 영상을 지우고 바로 새 영상을 고를 수 있게 파일 선택창을 연다
+els.changeVideoBtn.addEventListener('click', () => {
+  if (busy) {
+    alert('지금 GIF를 만드는 중이에요. 끝난 뒤에 바꿔 주세요.');
+    return;
   }
-  els.video.currentTime = +els.trimStart.value;
-  updateTrimUI();
+  removeVideo();
+  els.fileInput.click();
 });
 
-els.trimEnd.addEventListener('input', () => {
-  if (+els.trimEnd.value <= +els.trimStart.value) {
-    els.trimEnd.value = (+els.trimStart.value + 0.1).toFixed(1);
+function removeVideo() {
+  const video = els.video;
+  video.pause();
+  video.onloadedmetadata = null;
+  video.onerror = null;
+  video.removeAttribute('src');
+  video.load();
+
+  thumbToken++; // 진행 중인 썸네일 생성 중단
+  thumbBitmaps = [];
+  edit.dur = 0;
+  edit.start = 0;
+  edit.end = 0;
+  currentFile = null;
+  if (videoURL) {
+    URL.revokeObjectURL(videoURL);
+    videoURL = null;
   }
-  els.video.currentTime = +els.trimEnd.value;
-  updateTrimUI();
+
+  els.panelTrim.classList.add('hidden');
+  els.panelSettings.classList.add('hidden');
+  els.panelResult.classList.add('hidden');
+  els.dropZone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ---------------- 타임라인 필름스트립 ---------------- */
+
+// 별도의 숨은 video 엘리먼트로 썸네일을 뽑는다 — 사용자가 스크럽하는 본 플레이어와 충돌하지 않게
+async function buildThumbnails() {
+  const token = ++thumbToken;
+  thumbBitmaps = [];
+  drawThumbStrip();
+
+  const tv = document.createElement('video');
+  tv.muted = true;
+  tv.playsInline = true;
+  tv.preload = 'auto';
+  tv.src = videoURL;
+
+  const ok = await new Promise((resolve) => {
+    tv.onloadedmetadata = () => resolve(true);
+    tv.onerror = () => resolve(false);
+  });
+  if (!ok || token !== thumbToken) return;
+
+  const capH = 136; // 표시 높이(68px)의 2배로 캡처해 레티나에서도 선명하게
+  const aspect = (tv.videoWidth / tv.videoHeight) || (16 / 9);
+  const capW = Math.max(2, Math.round(capH * aspect));
+  const cnv = document.createElement('canvas');
+  cnv.width = capW;
+  cnv.height = capH;
+  const ctx = cnv.getContext('2d');
+
+  for (let i = 0; i < THUMB_COUNT; i++) {
+    if (token !== thumbToken) return;
+    await seekTo(tv, ((i + 0.5) / THUMB_COUNT) * edit.dur);
+    if (token !== thumbToken) return;
+    ctx.drawImage(tv, 0, 0, capW, capH);
+    try {
+      thumbBitmaps.push(await createImageBitmap(cnv));
+    } catch {
+      return; // 썸네일은 장식이므로 실패해도 편집 기능은 그대로 동작
+    }
+    drawThumbStrip(); // 뽑히는 대로 바로바로 표시
+  }
+  tv.removeAttribute('src');
+  tv.load();
+}
+
+function drawThumbStrip() {
+  const c = els.tlCanvas;
+  const rect = els.timeline.getBoundingClientRect();
+  if (!rect.width) return;
+  const dpr = window.devicePixelRatio || 1;
+  c.width = Math.round(rect.width * dpr);
+  c.height = Math.round(rect.height * dpr);
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0, 0, c.width, c.height);
+
+  const slotW = c.width / THUMB_COUNT;
+  thumbBitmaps.forEach((bm, i) => {
+    // 각 칸에 cover 방식으로 채운다
+    const s = Math.max(slotW / bm.width, c.height / bm.height);
+    const dw = bm.width * s;
+    const dh = bm.height * s;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(i * slotW, 0, slotW + 1, c.height);
+    ctx.clip();
+    ctx.drawImage(bm, i * slotW + (slotW - dw) / 2, (c.height - dh) / 2, dw, dh);
+    ctx.restore();
+  });
+}
+
+let resizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(drawThumbStrip, 150);
 });
 
-function updateTrimUI() {
-  const start = +els.trimStart.value;
-  const end = +els.trimEnd.value;
-  const dur = end - start;
-  els.trimStartLabel.textContent = formatTime(start);
-  els.trimEndLabel.textContent = formatTime(end);
+/* ---------------- 편집기: 선택 구간 UI ---------------- */
+
+const pct = (t) => edit.dur ? (t / edit.dur) * 100 : 0;
+
+function updateEditorUI() {
+  const sPct = pct(edit.start);
+  const ePct = pct(edit.end);
+  els.tlSelection.style.left = sPct + '%';
+  els.tlSelection.style.width = (ePct - sPct) + '%';
+  els.tlDimL.style.width = sPct + '%';
+  els.tlDimR.style.left = ePct + '%';
+  els.tlDimR.style.width = (100 - ePct) + '%';
+
+  els.selRangeLabel.textContent = `${formatTime(edit.start)} ~ ${formatTime(edit.end)}`;
+  const dur = edit.end - edit.start;
   els.trimDuration.textContent = `${dur.toFixed(1)}초`;
 
   const warn = els.trimWarn;
@@ -130,23 +260,172 @@ function updateTrimUI() {
   }
 }
 
-let previewHandler = null; // 이전 미리 재생 리스너가 쌓이지 않게 관리
+/* ---------------- 편집기: 타임라인 드래그 ---------------- */
 
-els.previewRangeBtn.addEventListener('click', () => {
-  const video = els.video;
-  const start = +els.trimStart.value;
-  const end = +els.trimEnd.value;
-  if (previewHandler) video.removeEventListener('timeupdate', previewHandler);
-  video.currentTime = start;
-  video.play();
-  previewHandler = () => {
-    if (video.currentTime >= end) {
-      video.pause();
-      video.removeEventListener('timeupdate', previewHandler);
-      previewHandler = null;
-    }
+function timeAtX(clientX) {
+  const r = els.timeline.getBoundingClientRect();
+  return clamp(((clientX - r.left) / r.width) * edit.dur, 0, edit.dur);
+}
+
+let drag = null;
+
+els.timeline.addEventListener('pointerdown', (e) => {
+  if (busy || !edit.dur) return;
+  e.preventDefault();
+  let mode = 'scrub';
+  if (e.target.closest('#tlHandleL')) mode = 'start';
+  else if (e.target.closest('#tlHandleR')) mode = 'end';
+  else if (e.target.closest('#tlSelection')) mode = 'move';
+
+  const t = timeAtX(e.clientX);
+  drag = {
+    mode,
+    wasPlaying: !els.video.paused,
+    grabOffset: t - edit.start,
+    len: edit.end - edit.start,
   };
-  video.addEventListener('timeupdate', previewHandler);
+  els.video.pause();
+  els.timeline.setPointerCapture(e.pointerId);
+  applyDrag(t);
+});
+
+els.timeline.addEventListener('pointermove', (e) => {
+  if (drag) applyDrag(timeAtX(e.clientX));
+});
+
+function endDrag() {
+  if (!drag) return;
+  if (drag.wasPlaying) els.video.play();
+  drag = null;
+}
+els.timeline.addEventListener('pointerup', endDrag);
+els.timeline.addEventListener('pointercancel', endDrag);
+
+function applyDrag(t) {
+  const v = els.video;
+  if (drag.mode === 'scrub') {
+    v.currentTime = Math.min(t, edit.dur - 0.001);
+  } else if (drag.mode === 'start') {
+    edit.start = clamp(t, 0, edit.end - MIN_GAP);
+    v.currentTime = edit.start;
+  } else if (drag.mode === 'end') {
+    edit.end = clamp(t, edit.start + MIN_GAP, edit.dur);
+    v.currentTime = Math.min(edit.end, edit.dur - 0.001);
+  } else if (drag.mode === 'move') {
+    const s = clamp(t - drag.grabOffset, 0, edit.dur - drag.len);
+    edit.start = s;
+    edit.end = s + drag.len;
+    v.currentTime = edit.start;
+  }
+  updateEditorUI();
+}
+
+/* ---------------- 편집기: 재생 컨트롤 ---------------- */
+
+function togglePlay() {
+  if (busy || !edit.dur) return;
+  const v = els.video;
+  if (!v.paused) {
+    v.pause();
+    return;
+  }
+  // 구간 밖이면 시작점부터
+  if (v.currentTime < edit.start - 0.01 || v.currentTime >= edit.end - 0.02) {
+    v.currentTime = edit.start;
+  }
+  v.play();
+}
+
+function frameStep(dir, big) {
+  if (busy || !edit.dur) return;
+  const v = els.video;
+  v.pause();
+  const step = big ? 1 : (+els.optSpeed.value / +els.optFps.value); // GIF 한 프레임이 원본에서 차지하는 시간
+  v.currentTime = clamp(v.currentTime + dir * step, 0, Math.max(0, edit.dur - 0.001));
+}
+
+function setStartHere() {
+  if (busy || !edit.dur) return;
+  edit.start = clamp(els.video.currentTime, 0, edit.end - MIN_GAP);
+  updateEditorUI();
+}
+
+function setEndHere() {
+  if (busy || !edit.dur) return;
+  edit.end = clamp(els.video.currentTime, edit.start + MIN_GAP, edit.dur);
+  updateEditorUI();
+}
+
+els.playBtn.addEventListener('click', togglePlay);
+els.video.addEventListener('click', togglePlay);
+els.frameBackBtn.addEventListener('click', () => frameStep(-1, false));
+els.frameFwdBtn.addEventListener('click', () => frameStep(1, false));
+els.jumpStartBtn.addEventListener('click', () => {
+  if (busy || !edit.dur) return;
+  els.video.currentTime = edit.start;
+});
+els.setStartBtn.addEventListener('click', setStartHere);
+els.setEndBtn.addEventListener('click', setEndHere);
+els.loopBtn.addEventListener('click', () => {
+  edit.loop = !edit.loop;
+  els.loopBtn.classList.toggle('active', edit.loop);
+});
+
+els.video.addEventListener('play', () => {
+  els.playBtn.textContent = '❚❚';
+  els.playBtn.setAttribute('aria-label', '일시정지');
+});
+els.video.addEventListener('pause', () => {
+  els.playBtn.textContent = '▶';
+  els.playBtn.setAttribute('aria-label', '재생');
+});
+
+// 재생 속도 설정은 미리보기에도 즉시 반영
+els.optSpeed.addEventListener('change', () => {
+  els.video.playbackRate = +els.optSpeed.value;
+});
+
+// 매 프레임 재생 헤드·시간 표시를 갱신하고 구간 끝에서 반복/정지 처리
+function tick() {
+  const v = els.video;
+  if (edit.dur && !els.panelTrim.classList.contains('hidden')) {
+    if (!v.paused && !busy && v.currentTime >= edit.end) {
+      if (edit.loop) v.currentTime = edit.start;
+      else v.pause();
+    }
+    els.tlPlayhead.style.left = pct(clamp(v.currentTime, 0, edit.dur)) + '%';
+    els.curTime.textContent = formatTime(v.currentTime);
+  }
+  requestAnimationFrame(tick);
+}
+requestAnimationFrame(tick);
+
+/* ---------------- 편집기: 키보드 단축키 ---------------- */
+
+document.addEventListener('keydown', (e) => {
+  if (els.panelTrim.classList.contains('hidden') || busy || !edit.dur) return;
+  const tag = e.target.tagName;
+  if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
+
+  if (e.key === ' ') {
+    e.preventDefault();
+    togglePlay();
+  } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    frameStep(-1, e.shiftKey);
+  } else if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    frameStep(1, e.shiftKey);
+  } else if (e.key === '[') {
+    e.preventDefault();
+    setStartHere();
+  } else if (e.key === ']') {
+    e.preventDefault();
+    setEndHere();
+  } else if (e.key === 'Home') {
+    e.preventDefault();
+    els.video.currentTime = edit.start;
+  }
 });
 
 /* ---------------- GIF 생성 ---------------- */
@@ -159,8 +438,8 @@ els.retryBtn.addEventListener('click', () => {
 
 async function makeGif() {
   const video = els.video;
-  const start = +els.trimStart.value;
-  const end = +els.trimEnd.value;
+  const start = edit.start;
+  const end = edit.end;
   const speed = +els.optSpeed.value;
   const userFps = +els.optFps.value;
   const userColors = +els.optColors.value;
@@ -226,6 +505,7 @@ async function makeGif() {
     els.makeBtn.disabled = false;
     busy = false;
     progress.hide();
+    video.currentTime = edit.start; // 추출하며 움직인 재생 헤드를 구간 시작으로 되돌린다
   }
 }
 
