@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>글자 수 세기 — 블로그 최적 글자수 체크 | 블로그 도구함</title>
 <meta name="description" content="공백 포함/제외 글자 수, 단어 수, 원고지 매수를 실시간으로 세고 블로그 목표 글자수 달성률을 보여줍니다.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="블로그 글자 수, 붙여넣는 즉시 확인 — 글자 수 세기">
+<meta property="og:description" content="공백 포함/제외·원고지 매수·목표 달성률까지 실시간. 쓰던 글은 내 브라우저에 자동 저장돼요.">
+<meta property="og:url" content="https://happyru120.github.io/my_blog/char-counter.html">
+<meta property="og:image" content="https://happyru120.github.io/my_blog/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔤</text></svg>">
@@ -60,9 +66,10 @@
     </div>
 
     <div class="result-actions" style="margin-top:16px">
-      <button class="btn btn-secondary" id="copyBtn" type="button">📋 전체 복사</button>
-      <button class="btn btn-secondary" id="clearBtn" type="button">🗑 지우기</button>
+      <button class="btn btn-secondary" id="copyBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 16H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/></svg>전체 복사</button>
+      <button class="btn btn-secondary" id="clearBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>지우기</button>
     </div>
+    <a class="next-tool" href="word-checker.html">🚨 분량 확인했다면 금칙어 검사도 한 번 <span class="next-label">금칙어 검사 <span class="arrow">→</span></span></a>
   </section>
 
   <section class="panel guide">
@@ -78,7 +85,8 @@
 
 <footer class="site-footer">
   <div class="container">
-    <p>모든 처리는 브라우저 안에서만 이루어지며 글이 외부로 전송되지 않습니다.</p>
+    <p>모든 처리는 브라우저 안에서만 이루어지며 글이 외부로 전송되지 않습니다.<br>
+    코드가 전부 공개되어 있어요 · <a href="https://github.com/happyru120/my_blog" target="_blank" rel="noopener">GitHub에서 보기</a></p>
   </div>
 </footer>
 

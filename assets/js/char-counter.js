@@ -87,9 +87,9 @@ els.copyBtn.addEventListener('click', async () => {
   if (!els.input.value) return;
   try {
     await navigator.clipboard.writeText(els.input.value);
-    const orig = els.copyBtn.textContent;
+    const orig = els.copyBtn.innerHTML; // 아이콘(SVG)까지 살려서 복원
     els.copyBtn.textContent = '✅ 복사됨!';
-    setTimeout(() => { els.copyBtn.textContent = orig; }, 1500);
+    setTimeout(() => { els.copyBtn.innerHTML = orig; }, 1500);
   } catch {
     els.input.select();
     document.execCommand('copy');

@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>영상 → GIF 변환기 — 네이버 블로그 기준 자동 압축 | 블로그 도구함</title>
 <meta name="description" content="영상을 잘라 GIF로 만들고 네이버 블로그 업로드 기준(10MB, 폭 966px)에 맞게 자동 압축합니다. 파일은 서버로 전송되지 않아요.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="영상을 10MB 움짤로, 30초 만에 — 영상 → GIF 변환기">
+<meta property="og:description" content="편집기처럼 구간을 고르고, 네이버 블로그 기준(10MB·966px)에 맞게 자동 압축. 무료·설치 없음·파일 유출 없음.">
+<meta property="og:url" content="https://happyru120.github.io/my_blog/gif-maker.html">
+<meta property="og:image" content="https://happyru120.github.io/my_blog/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
@@ -34,7 +40,8 @@
     <h2><span class="step-num">1</span> 영상 올리기</h2>
     <div class="drop-zone" id="dropZone">
       <div class="dz-icon">🎞️</div>
-      <p class="dz-main">영상 파일을 여기에 끌어다 놓으세요</p>
+      <p class="dz-main dz-main--desktop">영상 파일을 여기에 끌어다 놓으세요</p>
+      <p class="dz-main dz-main--touch">눌러서 영상을 선택하세요</p>
       <p>MP4 · WebM · MOV 등 브라우저에서 재생 가능한 영상</p>
       <span class="dz-btn">파일 선택</span>
     </div>
@@ -43,7 +50,7 @@
 
   <!-- STEP 2: 편집기 -->
   <section class="panel hidden" id="panel-trim">
-    <h2><span class="step-num">2</span> 구간 고르기 <button class="btn btn-secondary btn-sm panel-action" id="changeVideoBtn" type="button" title="지금 영상을 지우고 새 영상을 올려요">↺ 다른 영상으로 바꾸기</button></h2>
+    <h2><span class="step-num">2</span> 구간 고르기 <button class="btn btn-secondary btn-sm panel-action" id="changeVideoBtn" type="button" title="지금 영상을 지우고 새 영상을 올려요"><svg class="i" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>다른 영상으로 바꾸기</button></h2>
     <div class="editor-stage" id="editorStage">
       <div class="stage-video">
         <video id="video" playsinline muted></video>
@@ -56,7 +63,7 @@
           <button class="t-btn t-wide" id="frameBackBtn" type="button" title="한 프레임 뒤로 (←)">◀ 1컷</button>
           <button class="t-btn t-play" id="playBtn" type="button" title="선택 구간 재생/멈춤 (Space)" aria-label="재생">▶</button>
           <button class="t-btn t-wide" id="frameFwdBtn" type="button" title="한 프레임 앞으로 (→)">1컷 ▶</button>
-          <button class="t-btn t-wide active" id="loopBtn" type="button" title="구간 반복 재생 켜기/끄기">🔁 반복</button>
+          <button class="t-btn t-wide active" id="loopBtn" type="button" title="구간 반복 재생 켜기/끄기"><svg class="i" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>반복</button>
           <div class="t-time"><span id="curTime">0.0초</span><span class="t-sep">/</span><span id="totalTime">0.0초</span></div>
         </div>
 
@@ -139,7 +146,7 @@
     </div>
 
     <div style="margin-top:20px">
-      <button class="btn btn-primary btn-lg" id="makeBtn" type="button">🎬 GIF 만들기</button>
+      <button class="btn btn-primary btn-lg" id="makeBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 4v16M17 4v16M2 9h5M2 15h5M17 9h5M17 15h5"/></svg>GIF 만들기</button>
     </div>
 
     <div class="progress-wrap hidden" id="progressWrap">
@@ -167,10 +174,11 @@
       <div class="stat"><div class="stat-label">프레임</div><div class="stat-value" id="statFrames">-</div></div>
     </div>
     <div class="result-actions">
-      <a class="btn btn-primary" id="downloadBtn" download>⬇ GIF 저장하기</a>
-      <a class="btn btn-secondary" href="https://blog.naver.com/GoBlogWrite.naver" target="_blank" rel="noopener">✍ 네이버 블로그 글쓰기 열기</a>
-      <button class="btn btn-secondary" id="retryBtn" type="button">↺ 설정 바꿔 다시 만들기</button>
+      <a class="btn btn-primary" id="downloadBtn" download><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>GIF 저장하기</a>
+      <a class="btn btn-secondary" href="https://blog.naver.com/GoBlogWrite.naver" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>네이버 블로그 글쓰기 열기</a>
+      <button class="btn btn-secondary" id="retryBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>설정 바꿔 다시 만들기</button>
     </div>
+    <a class="next-tool" href="image-resizer.html">🖼️ 본문에 넣을 사진도 966px로 맞춰두면 좋아요 <span class="next-label">이미지 리사이즈 <span class="arrow">→</span></span></a>
   </section>
 
   <!-- guide -->
@@ -187,7 +195,8 @@
 
 <footer class="site-footer">
   <div class="container">
-    <p>모든 변환은 브라우저 안에서만 이루어지며 파일이 외부로 전송되지 않습니다.</p>
+    <p>모든 변환은 브라우저 안에서만 이루어지며 파일이 외부로 전송되지 않습니다.<br>
+    코드가 전부 공개되어 있어요 · <a href="https://github.com/happyru120/my_blog" target="_blank" rel="noopener">GitHub에서 보기</a></p>
   </div>
 </footer>
 

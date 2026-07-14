@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>블로그 도구함 — 네이버 블로그 필수 도구 모음</title>
-<meta name="description" content="네이버 블로그 운영에 필요한 도구 모음. 영상을 네이버 블로그 기준에 맞는 GIF로 변환하고 자동 압축하세요.">
+<meta name="description" content="GIF 변환, 사진 리사이즈, 썸네일 제작, 글자 수 세기, 금칙어 검사까지 — 설치 없이 브라우저에서 끝내는 네이버 블로그 도구 모음. 파일은 서버로 전송되지 않아요.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="블로그 도구함 — 네이버 블로그 필수 도구 모음">
+<meta property="og:description" content="GIF 변환 · 사진 리사이즈 · 썸네일 · 글자 수 · 금칙어 검사. 설치 없이, 무료로, 파일 유출 없이.">
+<meta property="og:url" content="https://happyru120.github.io/my_blog/">
+<meta property="og:image" content="https://happyru120.github.io/my_blog/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧰</text></svg>">
@@ -26,8 +32,12 @@
 <main class="container">
   <section class="hero">
     <span class="hero-chip">✨ 설치 없음 · 무료 · 회원가입 없음</span>
-    <h1>네이버 블로그를 위한<br><span class="accent">작고 편리한 도구들</span></h1>
-    <p>모든 작업은 내 브라우저 안에서만 처리되고<br>영상이나 사진이 서버로 전송되지 않습니다.</p>
+    <h1>네이버 블로그 글쓰기,<br><span class="accent">발행 전 여기서 한 번에</span></h1>
+    <p>사진·영상 다듬기부터 금칙어 검사까지, 모든 작업은 내 브라우저 안에서만 처리되고<br>파일이 서버로 전송되지 않습니다.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="gif-maker.html">GIF 변환기 바로 쓰기</a>
+      <a class="btn btn-secondary" href="#tools">도구 모두 보기</a>
+    </div>
     <ul class="hero-features">
       <li>🔒 파일이 밖으로 나가지 않아요</li>
       <li>⚡ 업로드 대기 없이 바로 변환</li>
@@ -35,47 +45,48 @@
     </ul>
   </section>
 
-  <section class="tools-grid">
+  <section class="tools-grid" id="tools">
     <a class="tool-card" href="gif-maker.html">
       <div class="tool-icon">🎬</div>
       <h2>영상 → GIF 변환기</h2>
       <p>영상을 잘라서 움짤(GIF)로 만들고, 네이버 블로그 업로드 기준(10MB · 폭 966px)에 맞게 자동 압축해요.</p>
-      <span class="tool-badge">사용 가능</span>
+      <span class="tool-badge">10MB 자동 압축</span>
     </a>
 
     <a class="tool-card" href="image-resizer.html">
       <div class="tool-icon">🖼️</div>
       <h2>이미지 리사이즈</h2>
       <p>사진을 본문 폭(966px)에 맞게 일괄 리사이즈·압축하고, 집 주소가 드러날 수 있는 GPS 위치정보까지 자동으로 지워요.</p>
-      <span class="tool-badge">사용 가능</span>
+      <span class="tool-badge">GPS 위치정보 제거</span>
     </a>
 
     <a class="tool-card" href="thumbnail-maker.html">
       <div class="tool-icon">✂️</div>
       <h2>썸네일 메이커</h2>
       <p>대표 이미지 규격(1:1, 800×800)에 맞게 사진을 배치하고 제목을 얹어 썸네일을 만들어요.</p>
-      <span class="tool-badge">사용 가능</span>
+      <span class="tool-badge">800×800 규격</span>
     </a>
 
     <a class="tool-card" href="char-counter.html">
       <div class="tool-icon">🔤</div>
       <h2>글자 수 세기</h2>
       <p>공백 포함/제외 글자 수와 원고지 매수를 실시간으로 세고, 목표 글자수 달성률을 보여줘요.</p>
-      <span class="tool-badge">사용 가능</span>
+      <span class="tool-badge">쓰던 글 자동 저장</span>
     </a>
 
     <a class="tool-card" href="word-checker.html">
       <div class="tool-icon">🚨</div>
       <h2>금칙어 검사</h2>
       <p>의료법·표시광고법 위반 소지가 있는 과장 표현과 위험 단어를 찾아 표시해요.</p>
-      <span class="tool-badge">사용 가능</span>
+      <span class="tool-badge">발행 전 필수 체크</span>
     </a>
   </section>
 </main>
 
 <footer class="site-footer">
   <div class="container">
-    <p>모든 변환은 브라우저 안에서만 이루어지며 파일이 외부로 전송되지 않습니다.</p>
+    <p>모든 변환은 브라우저 안에서만 이루어지며 파일이 외부로 전송되지 않습니다.<br>
+    코드가 전부 공개되어 있어요 · <a href="https://github.com/happyru120/my_blog" target="_blank" rel="noopener">GitHub에서 보기</a></p>
   </div>
 </footer>
 </body>

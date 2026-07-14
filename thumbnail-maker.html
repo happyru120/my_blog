@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>썸네일 메이커 — 네이버 블로그 대표 이미지 제작 | 블로그 도구함</title>
 <meta name="description" content="네이버 블로그 대표 이미지 규격(1:1, 800×800)에 맞는 썸네일을 만듭니다. 사진 위에 제목을 얹고 바로 저장하세요.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="클릭되는 대표 이미지, 1분 완성 — 썸네일 메이커">
+<meta property="og:description" content="네이버 블로그 규격(1:1, 800×800)에 사진을 배치하고 제목을 얹어 바로 저장. 무료·설치 없음.">
+<meta property="og:url" content="https://happyru120.github.io/my_blog/thumbnail-maker.html">
+<meta property="og:image" content="https://happyru120.github.io/my_blog/assets/og.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>">
@@ -39,7 +45,7 @@
       <div class="thumb-controls">
         <div class="setting">
           <label>배경 사진</label>
-          <button class="btn btn-secondary w-full" id="pickImageBtn" type="button">📸 사진 불러오기</button>
+          <button class="btn btn-secondary w-full" id="pickImageBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-4.5-4.5L6 21"/></svg>사진 불러오기</button>
           <input type="file" id="fileInput" accept="image/*" class="hidden">
         </div>
         <div class="setting">
@@ -97,9 +103,10 @@
   <section class="panel">
     <h2><span class="step-num">3</span> 저장</h2>
     <div class="result-actions">
-      <button class="btn btn-primary" id="downloadBtn" type="button">⬇ 썸네일 저장 (800×800 JPG)</button>
-      <a class="btn btn-secondary" href="https://blog.naver.com/GoBlogWrite.naver" target="_blank" rel="noopener">✍ 네이버 블로그 글쓰기 열기</a>
+      <button class="btn btn-primary" id="downloadBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 11l5 5 5-5"/><path d="M5 21h14"/></svg>썸네일 저장 (800×800 JPG)</button>
+      <a class="btn btn-secondary" href="https://blog.naver.com/GoBlogWrite.naver" target="_blank" rel="noopener"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>네이버 블로그 글쓰기 열기</a>
     </div>
+    <a class="next-tool" href="word-checker.html">🚨 발행 전에 금칙어 검사도 한 번 돌려보세요 <span class="next-label">금칙어 검사 <span class="arrow">→</span></span></a>
   </section>
 
   <section class="panel guide">
@@ -115,7 +122,8 @@
 
 <footer class="site-footer">
   <div class="container">
-    <p>모든 처리는 브라우저 안에서만 이루어지며 사진이 외부로 전송되지 않습니다.</p>
+    <p>모든 처리는 브라우저 안에서만 이루어지며 사진이 외부로 전송되지 않습니다.<br>
+    코드가 전부 공개되어 있어요 · <a href="https://github.com/happyru120/my_blog" target="_blank" rel="noopener">GitHub에서 보기</a></p>
   </div>
 </footer>
 

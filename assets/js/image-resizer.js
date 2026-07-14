@@ -70,7 +70,7 @@ els.wmImgInput.addEventListener('change', async () => {
     const bitmap = await createImageBitmap(file);
     if (wmLogo) wmLogo.bitmap.close();
     wmLogo = { name: file.name, bitmap };
-    els.wmImgBtn.textContent = `🖼 ${file.name}`;
+    els.wmImgBtn.textContent = file.name;
     els.wmImgBtn.classList.add('has-logo');
     updateWmPreview();
   } catch {
