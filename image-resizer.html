@@ -74,25 +74,33 @@
         </select>
         <div class="hint">균형으로도 화질 차이가 거의 안 보여요.</div>
       </div>
-      <div class="setting">
-        <label for="optWmPos">워터마크 위치</label>
-        <select id="optWmPos" disabled>
-          <option value="br" selected>오른쪽 아래</option>
-          <option value="bl">왼쪽 아래</option>
-          <option value="tr">오른쪽 위</option>
-          <option value="tl">왼쪽 위</option>
-          <option value="c">가운데</option>
-        </select>
-        <div class="hint">사진 도용 방지 서명이에요.</div>
-      </div>
     </div>
 
     <div class="checkbox-row" style="margin-top:16px">
       <input type="checkbox" id="optWmOn">
       <div style="flex:1">
         <label for="optWmOn" style="display:inline;font-size:14px;font-weight:700">워터마크 넣기</label>
-        <input type="text" id="optWmText" class="form-control" placeholder="예: ⓒ내블로그닉네임" maxlength="30"
-               style="margin-top:8px" disabled>
+        <div class="hint">사진 도용 방지용 닉네임 서명을 사진 구석에 넣어요.</div>
+        <div class="wm-options hidden" id="wmOptions">
+          <select id="optWmType" class="form-control" title="워터마크 종류">
+            <option value="text" selected>글자 서명</option>
+            <option value="image">이미지 로고</option>
+          </select>
+          <input type="text" id="optWmText" class="form-control" placeholder="워터마크 문구 — 예: ⓒ내블로그닉네임" maxlength="30">
+          <button class="btn btn-secondary wm-logo-btn hidden" id="wmImgBtn" type="button">🖼 로고 파일 선택 (PNG 권장)</button>
+          <input type="file" id="wmImgInput" accept="image/*" class="hidden">
+          <select id="optWmPos" class="form-control" title="워터마크 위치">
+            <option value="br" selected>오른쪽 아래</option>
+            <option value="bl">왼쪽 아래</option>
+            <option value="tr">오른쪽 위</option>
+            <option value="tl">왼쪽 위</option>
+            <option value="c">가운데</option>
+          </select>
+          <div class="wm-preview hidden" id="wmPreviewWrap">
+            <canvas id="wmPreviewCanvas"></canvas>
+            <div class="hint">첫 번째 사진으로 본 미리보기 — 실제 저장본과 같은 비율로 들어가요.</div>
+          </div>
+        </div>
       </div>
     </div>
 

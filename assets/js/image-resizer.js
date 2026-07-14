@@ -15,8 +15,11 @@ const els = {
   optFormat: $('optFormat'),
   optQuality: $('optQuality'),
   optWmOn: $('optWmOn'),
+  optWmType: $('optWmType'),
   optWmText: $('optWmText'),
   optWmPos: $('optWmPos'),
+  wmImgBtn: $('wmImgBtn'),
+  wmImgInput: $('wmImgInput'),
   convertBtn: $('convertBtn'),
   imgList: $('imgList'),
   listSummary: $('listSummary'),
@@ -35,9 +38,98 @@ const progress = createProgress();
 initDropZone(els.dropZone, els.fileInput, addFiles);
 
 els.optWmOn.addEventListener('change', () => {
-  els.optWmText.disabled = els.optWmPos.disabled = !els.optWmOn.checked;
-  if (els.optWmOn.checked) els.optWmText.focus();
+  $('wmOptions').classList.toggle('hidden', !els.optWmOn.checked);
+  if (els.optWmOn.checked && els.optWmType.value === 'text') els.optWmText.focus();
+  updateWmPreview();
 });
+els.optWmText.addEventListener('input', updateWmPreview);
+els.optWmPos.addEventListener('change', updateWmPreview);
+
+// 워터마크 종류 전환: 글자 서명 ↔ 이미지 로고
+els.optWmType.addEventListener('change', () => {
+  const isImage = els.optWmType.value === 'image';
+  els.optWmText.classList.toggle('hidden', isImage);
+  els.wmImgBtn.classList.toggle('hidden', !isImage);
+  if (isImage && !wmLogo) els.wmImgInput.click(); // 처음 고르면 바로 파일 선택창
+  updateWmPreview();
+});
+
+let wmLogo = null; // { name, bitmap } — 투명 배경(PNG)이 그대로 유지된다
+
+els.wmImgBtn.addEventListener('click', () => els.wmImgInput.click());
+
+els.wmImgInput.addEventListener('change', async () => {
+  const file = els.wmImgInput.files[0];
+  els.wmImgInput.value = '';
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('이미지 파일을 선택해 주세요. (투명 배경은 PNG)');
+    return;
+  }
+  try {
+    const bitmap = await createImageBitmap(file);
+    if (wmLogo) wmLogo.bitmap.close();
+    wmLogo = { name: file.name, bitmap };
+    els.wmImgBtn.textContent = `🖼 ${file.name}`;
+    els.wmImgBtn.classList.add('has-logo');
+    updateWmPreview();
+  } catch {
+    alert('로고 이미지를 읽지 못했어요. PNG 파일을 권장합니다.');
+  }
+});
+
+/* ---------------- 워터마크 실시간 미리보기 ---------------- */
+// 첫 번째 사진 위에 지금 설정대로 워터마크를 그려서 바로 보여준다.
+// drawWatermark의 글자 크기는 폭에 비례하므로 축소 미리보기도 실제 저장본과 같은 비율이다.
+
+let wmPreviewSrc = null;    // 미리보기 비트맵의 원본 파일 (바뀌면 다시 디코딩)
+let wmPreviewBitmap = null;
+
+async function updateWmPreview() {
+  const wrap = $('wmPreviewWrap');
+  if (!els.optWmOn.checked || !items.length) {
+    wrap.classList.add('hidden');
+    return;
+  }
+
+  const file = items[0].file;
+  if (wmPreviewSrc !== file) {
+    wmPreviewSrc = file;
+    if (wmPreviewBitmap) wmPreviewBitmap.close();
+    wmPreviewBitmap = null;
+    try {
+      const full = await createImageBitmap(file);
+      // 미리보기용으로 작게 줄여서 보관
+      const w = Math.min(840, full.width);
+      const h = Math.round(full.height * (w / full.width));
+      wmPreviewBitmap = await createImageBitmap(full, { resizeWidth: w, resizeHeight: h, resizeQuality: 'high' });
+      full.close();
+    } catch {
+      wrap.classList.add('hidden');
+      return;
+    }
+    if (wmPreviewSrc !== file) return; // 그 사이 파일이 바뀌었으면 무시
+  }
+  if (!wmPreviewBitmap) return;
+
+  const canvas = $('wmPreviewCanvas');
+  canvas.width = wmPreviewBitmap.width;
+  canvas.height = wmPreviewBitmap.height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(wmPreviewBitmap, 0, 0);
+
+  const pos = els.optWmPos.value;
+  if (els.optWmType.value === 'image') {
+    if (wmLogo) drawWatermarkImage(ctx, canvas.width, canvas.height, { bitmap: wmLogo.bitmap, pos });
+  } else {
+    const typed = els.optWmText.value.trim();
+    ctx.globalAlpha = typed ? 1 : 0.55; // 아직 안 썼으면 예시임을 흐리게 표시
+    drawWatermark(ctx, canvas.width, canvas.height, { text: typed || 'ⓒ내블로그닉네임', pos });
+    ctx.globalAlpha = 1;
+  }
+
+  wrap.classList.remove('hidden');
+}
 
 async function addFiles(files) {
   const images = files.filter((f) => f.type.startsWith('image/'));
@@ -60,6 +152,7 @@ async function addFiles(files) {
   els.panelSettings.classList.remove('hidden');
   els.panelList.classList.remove('hidden');
   els.listSummary.classList.add('hidden');
+  updateWmPreview();
 }
 
 function renderItem(item) {
@@ -106,10 +199,23 @@ els.clearBtn.addEventListener('click', () => {
   els.writeBtn.classList.add('hidden');
   els.panelList.classList.add('hidden');
   els.panelSettings.classList.add('hidden');
+  updateWmPreview(); // 목록이 비면 미리보기도 숨긴다
 });
 
 async function convertAll() {
   if (!items.length) return;
+  if (els.optWmOn.checked) {
+    if (els.optWmType.value === 'image' && !wmLogo) {
+      alert('워터마크로 쓸 로고 이미지를 선택해 주세요. (투명 배경은 PNG)');
+      els.wmImgInput.click();
+      return;
+    }
+    if (els.optWmType.value === 'text' && !els.optWmText.value.trim()) {
+      alert('워터마크 문구를 입력해 주세요. (예: ⓒ내블로그닉네임)');
+      els.optWmText.focus();
+      return;
+    }
+  }
   els.convertBtn.disabled = true;
 
   // GPS 감지가 끝나기 전에 변환하면 '위치정보 제거' 집계가 빠질 수 있으므로 완료를 기다린다 (수 ms 수준)
@@ -119,7 +225,9 @@ async function convertAll() {
   const format = els.optFormat.value;
   const quality = +els.optQuality.value;
   const watermark = els.optWmOn.checked ? {
+    mode: els.optWmType.value,
     text: els.optWmText.value.trim(),
+    bitmap: wmLogo ? wmLogo.bitmap : null,
     pos: els.optWmPos.value,
   } : null;
 
@@ -194,7 +302,13 @@ async function processImage(file, { maxWidth, format, quality, watermark }) {
   ctx.drawImage(bitmap, 0, 0, outW, outH);
   bitmap.close();
 
-  if (watermark && watermark.text) drawWatermark(ctx, outW, outH, watermark);
+  if (watermark) {
+    if (watermark.mode === 'image' && watermark.bitmap) {
+      drawWatermarkImage(ctx, outW, outH, watermark);
+    } else if (watermark.text) {
+      drawWatermark(ctx, outW, outH, watermark);
+    }
+  }
 
   let outType = format;
   if (format === 'auto') {
@@ -237,6 +351,25 @@ function drawWatermark(ctx, w, h, { text, pos }) {
   }
   ctx.strokeText(text, x, y);
   ctx.fillText(text, x, y);
+}
+
+// 이미지 로고 워터마크: 사진 폭의 18% 크기로 배치 (PNG 투명 배경 유지)
+function drawWatermarkImage(ctx, w, h, { bitmap, pos }) {
+  const pad = Math.round(w * 0.025);
+  const logoW = Math.max(24, Math.round(w * 0.18));
+  const logoH = Math.max(1, Math.round(bitmap.height * (logoW / bitmap.width)));
+
+  let x, y;
+  if (pos === 'c') {
+    x = (w - logoW) / 2;
+    y = (h - logoH) / 2;
+  } else {
+    x = pos.includes('r') ? w - pad - logoW : pad;
+    y = pos.includes('b') ? h - pad - logoH : pad;
+  }
+  ctx.globalAlpha = 0.88; // 은은하게 — 로고 자체 투명도와 곱해진다
+  ctx.drawImage(bitmap, x, y, logoW, logoH);
+  ctx.globalAlpha = 1;
 }
 
 /* ---------------- GPS(EXIF) 감지 ---------------- */

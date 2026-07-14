@@ -782,13 +782,48 @@ input[type="range"]::-moz-range-thumb {
   font-size: 14px;
 }
 
-.checkbox-row input {
+.checkbox-row input[type="checkbox"] {
   accent-color: var(--green);
   width: 17px;
   height: 17px;
   margin-top: 2px;
   flex: none;
 }
+
+/* 워터마크 옵션: 체크하면 문구 입력 + 위치 선택이 나타난다 */
+.wm-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.wm-options .form-control { flex: 1; min-width: 200px; }
+
+.wm-options select.form-control {
+  flex: none;
+  width: auto;
+  min-width: 130px;
+  cursor: pointer;
+}
+
+.wm-logo-btn { flex: 1; min-width: 200px; justify-content: flex-start; }
+.wm-logo-btn.has-logo { border-color: var(--green); color: var(--green-deep); }
+
+.wm-preview {
+  width: 100%;
+  margin-top: 2px;
+}
+
+.wm-preview canvas {
+  display: block;
+  max-width: 420px;
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.wm-preview .hint { margin-top: 6px; }
 
 .checkbox-row .hint { font-size: 12.5px; color: var(--text-sub); }
 
