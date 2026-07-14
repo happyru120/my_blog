@@ -99,11 +99,17 @@ async function updateWmPreview() {
     wmPreviewBitmap = null;
     try {
       const full = await createImageBitmap(file);
-      // 미리보기용으로 작게 줄여서 보관
+      // 미리보기용으로 작게 줄여서 보관 (캔버스 축소 — iOS Safari 포함 모든 브라우저 지원)
       const w = Math.min(840, full.width);
       const h = Math.round(full.height * (w / full.width));
-      wmPreviewBitmap = await createImageBitmap(full, { resizeWidth: w, resizeHeight: h, resizeQuality: 'high' });
+      const c = document.createElement('canvas');
+      c.width = w;
+      c.height = h;
+      const cctx = c.getContext('2d');
+      cctx.imageSmoothingQuality = 'high';
+      cctx.drawImage(full, 0, 0, w, h);
       full.close();
+      wmPreviewBitmap = await createImageBitmap(c);
     } catch {
       wrap.classList.add('hidden');
       return;

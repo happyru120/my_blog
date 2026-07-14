@@ -285,7 +285,7 @@ els.timeline.addEventListener('pointerdown', (e) => {
     len: edit.end - edit.start,
   };
   els.video.pause();
-  els.timeline.setPointerCapture(e.pointerId);
+  try { els.timeline.setPointerCapture(e.pointerId); } catch { /* 합성 이벤트 등 캡처 불가 시에도 드래그는 계속 */ }
   applyDrag(t);
 });
 
