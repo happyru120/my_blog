@@ -11,37 +11,41 @@
 <meta property="og:url" content="https://happyru120.github.io/my_blog/image-resizer.html">
 <meta property="og:image" content="https://happyru120.github.io/my_blog/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
 </head>
 <body>
 <header class="site-header">
-  <div class="container header-inner">
-    <a class="logo" href="./">🧰 블로그 도구함</a>
-    <nav class="site-nav">
-      <a href="gif-maker.html">GIF</a>
-      <a href="image-resizer.html">리사이즈</a>
-      <a href="thumbnail-maker.html">썸네일</a>
-      <a href="char-counter.html">글자 수</a>
-      <a href="word-checker.html">금칙어</a>
-    </nav>
-  </div>
+  <a class="logo" href="./">블로그 도구함★</a>
+  <nav class="site-nav">
+    <a href="gif-maker.html">GIF</a>
+    <a href="image-resizer.html" aria-current="page">리사이즈</a>
+    <a href="thumbnail-maker.html">썸네일</a>
+    <a href="char-counter.html">글자 수</a>
+    <a href="word-checker.html">금칙어</a>
+  </nav>
+  <div class="header-tag">FREE / NO 가입</div>
 </header>
 
 <main class="container tool-page">
   <div class="tool-title">
-    <h1>🖼️ 이미지 리사이즈</h1>
-    <p>사진 여러 장을 한 번에 네이버 블로그 본문 폭(<strong>966px</strong>)에 맞게 줄이고 용량을 압축해요. 변환 과정에서 집 주소가 드러날 수 있는 <strong>GPS 위치정보(EXIF)가 자동으로 제거</strong>됩니다. 모든 처리는 내 브라우저 안에서만 이루어져요.</p>
+    <div class="tool-eyebrow">TOOL 02 — 이미지 리사이즈</div>
+    <h1>사진 50장,<br><span class="hl">966px로 한 방에.</span></h1>
+    <p>본문 폭에 맞게 일괄 리사이즈 + 압축. 집 주소 새는 GPS 위치정보(EXIF)는 물어보지도 않고 지웁니다. 워터마크도 덤.</p>
+    <div class="sticker">GPS 삭제 무료</div>
   </div>
 
   <!-- STEP 1: upload -->
   <section class="panel" id="panel-upload">
-    <h2><span class="step-num">1</span> 사진 올리기</h2>
+    <h2><span class="step-num">STEP 01</span> 사진 던져 넣기</h2>
     <div class="drop-zone" id="dropZone">
       <div class="dz-icon">📸</div>
-      <p class="dz-main dz-main--desktop">사진들을 여기에 끌어다 놓으세요 (여러 장 가능)</p>
-      <p class="dz-main dz-main--touch">눌러서 사진을 선택하세요 (여러 장 가능)</p>
+      <p class="dz-main dz-main--desktop">사진을 전부 끌어다 놓으세요</p>
+      <p class="dz-main dz-main--touch">눌러서 사진을 선택하세요</p>
       <p>JPG · PNG · WebP — 몇 장이든 한 번에</p>
       <span class="dz-btn">파일 선택</span>
     </div>
@@ -50,7 +54,7 @@
 
   <!-- STEP 2: settings -->
   <section class="panel hidden" id="panel-settings">
-    <h2><span class="step-num">2</span> 리사이즈 설정</h2>
+    <h2><span class="step-num">STEP 02</span> 설정</h2>
     <div class="settings-grid">
       <div class="setting">
         <label for="optWidth">가로 크기 (px)</label>
@@ -61,7 +65,7 @@
           <option value="480">480px</option>
           <option value="0">원본 크기 유지</option>
         </select>
-        <div class="hint">원본이 더 작으면 확대하지 않아요.</div>
+        <div class="hint">원본이 더 작으면 확대하지 않아요</div>
       </div>
       <div class="setting">
         <label for="optFormat">파일 형식</label>
@@ -70,7 +74,7 @@
           <option value="image/jpeg">JPG — 용량 작음</option>
           <option value="image/png">PNG — 무손실</option>
         </select>
-        <div class="hint">스크린샷·그림은 PNG, 사진은 JPG가 유리해요.</div>
+        <div class="hint">스크린샷은 PNG, 사진은 JPG가 유리</div>
       </div>
       <div class="setting">
         <label for="optQuality">화질 (JPG)</label>
@@ -79,21 +83,21 @@
           <option value="0.85" selected>균형 (권장)</option>
           <option value="0.75">최대 압축</option>
         </select>
-        <div class="hint">균형으로도 화질 차이가 거의 안 보여요.</div>
+        <div class="hint">균형으로도 차이 거의 안 보임</div>
       </div>
     </div>
 
-    <div class="checkbox-row" style="margin-top:16px">
+    <div class="checkbox-row" style="margin-top:22px">
       <input type="checkbox" id="optWmOn">
       <div style="flex:1">
-        <label for="optWmOn" style="display:inline;font-size:14px;font-weight:700">워터마크 넣기</label>
-        <div class="hint">사진 도용 방지용 닉네임 서명을 사진 구석에 넣어요.</div>
+        <label for="optWmOn" style="display:inline;font-size:14px;font-weight:800">워터마크 넣기 — 내 사진 퍼가는 사람들에게 유감을</label>
+        <div class="hint">닉네임 서명을 사진 구석에 박아요.</div>
         <div class="wm-options hidden" id="wmOptions">
           <select id="optWmType" class="form-control" title="워터마크 종류">
             <option value="text" selected>글자 서명</option>
             <option value="image">이미지 로고</option>
           </select>
-          <input type="text" id="optWmText" class="form-control" placeholder="워터마크 문구 — 예: ⓒ내블로그닉네임" maxlength="30">
+          <input type="text" id="optWmText" class="form-control" placeholder="ⓒ내블로그닉네임" maxlength="30">
           <button class="btn btn-secondary wm-logo-btn hidden" id="wmImgBtn" type="button">로고 파일 선택 (PNG 권장)</button>
           <input type="file" id="wmImgInput" accept="image/*" class="hidden">
           <select id="optWmPos" class="form-control" title="워터마크 위치">
@@ -111,16 +115,16 @@
       </div>
     </div>
 
-    <div class="checkbox-row">
+    <div class="checkbox-row checkbox-row--locked">
       <input type="checkbox" checked disabled>
       <div>
-        <span style="font-size:14px;font-weight:700">GPS 위치정보(EXIF) 제거 — 항상 켜짐</span>
-        <div class="hint">스마트폰 사진에는 촬영 위치가 저장돼 있어 집 주소가 노출될 수 있어요. 변환하면 자동으로 깨끗하게 지워집니다.</div>
+        <span style="font-size:14px;font-weight:800">GPS 위치정보 제거 — 항상 켜짐 (끌 수 없음, 끄지 마세요)</span>
+        <div class="hint">스마트폰 사진엔 촬영 위치가 박혀 있어요. 집에서 찍은 사진 = 집 주소 공개.</div>
       </div>
     </div>
 
     <div style="margin-top:20px">
-      <button class="btn btn-primary btn-lg" id="convertBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-4.5-4.5L6 21"/></svg>변환하기</button>
+      <button class="btn btn-primary btn-lg" id="convertBtn" type="button">변환하기 ★</button>
     </div>
 
     <div class="progress-wrap hidden" id="progressWrap">
@@ -131,34 +135,44 @@
 
   <!-- file list & result -->
   <section class="panel hidden" id="panel-list">
-    <h2><span class="step-num">3</span> 사진 목록</h2>
+    <h2><span class="step-num">STEP 03</span> 사진 목록</h2>
     <div class="result-verdict ok hidden" id="listSummary"></div>
     <div class="img-list" id="imgList"></div>
     <div class="result-actions" style="margin-top:18px">
-      <button class="btn btn-primary hidden" id="zipBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7l8.7 5 8.7-5"/><path d="M12 22V12"/></svg>전체 ZIP으로 저장</button>
-      <a class="btn btn-secondary hidden" href="https://blog.naver.com/GoBlogWrite.naver" target="_blank" rel="noopener" id="writeBtn"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>네이버 블로그 글쓰기 열기</a>
-      <button class="btn btn-secondary" id="clearBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>목록 비우기</button>
+      <button class="btn btn-primary hidden" id="zipBtn" type="button">전체 ZIP으로 저장</button>
+      <a class="btn btn-secondary hidden" href="https://blog.naver.com/GoBlogWrite.naver" target="_blank" rel="noopener" id="writeBtn">네이버 글쓰기 열기 ↗</a>
+      <button class="btn btn-secondary" id="clearBtn" type="button">목록 비우기</button>
     </div>
-    <a class="next-tool" href="thumbnail-maker.html">✂️ 이 글의 대표 이미지도 만들어 볼까요? <span class="next-label">썸네일 메이커 <span class="arrow">→</span></span></a>
+    <a class="next-tool" href="thumbnail-maker.html">이 글의 대표 이미지도 만들어 볼까요? <span class="next-label">썸네일 메이커 <span class="arrow">→</span></span></a>
   </section>
 
   <!-- guide -->
   <section class="panel guide">
-    <h2>💡 왜 966px인가요?</h2>
-    <ul>
-      <li><strong>본문 폭 966px</strong> — 네이버 블로그 본문 최대 폭이 966px이에요. 이보다 큰 사진을 올리면 네이버가 어차피 줄여서 보여주므로, 미리 맞춰 올리면 화질 저하 없이 용량만 가벼워져요.</li>
-      <li><strong>GPS 위치정보</strong> — 스마트폰 사진에는 거의 항상 촬영 위치(GPS)가 저장돼요. 집이나 회사에서 찍은 사진을 그대로 올리면 주소가 노출될 수 있어요. 이 도구로 변환한 사진은 위치정보가 완전히 제거됩니다.</li>
-      <li><strong>용량이 가벼우면</strong> — 글 로딩이 빨라져 방문자 이탈이 줄고, 사진 수십 장짜리 포스팅도 부담 없이 올릴 수 있어요.</li>
-      <li><strong>워터마크</strong> — 맛집·여행 사진 도용이 흔해요. 닉네임 워터마크를 구석에 넣어두면 퍼가기를 줄일 수 있어요.</li>
-    </ul>
+    <h2>왜 966px? 왜 GPS 삭제?</h2>
+    <div class="guide-grid">
+      <div class="guide-card">
+        <h3>본문 폭 966px</h3>
+        <p>더 크게 올려도 네이버가 어차피 줄여서 보여줘요. 미리 맞추면 화질 그대로, 용량만 다이어트.</p>
+      </div>
+      <div class="guide-card">
+        <h3>GPS = 집 주소</h3>
+        <p>스마트폰 사진엔 거의 항상 촬영 위치가 저장돼요. 변환하면 완전히 제거됩니다.</p>
+      </div>
+      <div class="guide-card">
+        <h3>가벼우면 이득</h3>
+        <p>로딩이 빨라져 방문자 이탈이 줄고, 사진 수십 장 포스팅도 부담 없음.</p>
+      </div>
+      <div class="guide-card">
+        <h3>워터마크</h3>
+        <p>맛집·여행 사진 도용 흔해요. 닉네임 하나 박아두면 퍼가기가 확 줄어요.</p>
+      </div>
+    </div>
   </section>
 </main>
 
 <footer class="site-footer">
-  <div class="container">
-    <p>모든 변환은 브라우저 안에서만 이루어지며 파일이 외부로 전송되지 않습니다.<br>
-    코드가 전부 공개되어 있어요 · <a href="https://github.com/happyru120/my_blog" target="_blank" rel="noopener">GitHub에서 보기</a></p>
-  </div>
+  <span>ⓒ 블로그 도구함 — <a href="https://github.com/happyru120/my_blog" target="_blank" rel="noopener">GITHUB에 코드 전부 공개</a></span>
+  <span>NO SERVER · NO SIGNUP · NO 눈물</span>
 </footer>
 
 <script type="module" src="assets/js/image-resizer.js"></script>

@@ -11,28 +11,32 @@
 <meta property="og:url" content="https://happyru120.github.io/my_blog/char-counter.html">
 <meta property="og:image" content="https://happyru120.github.io/my_blog/assets/og.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" crossorigin="anonymous">
 <link rel="stylesheet" href="assets/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔤</text></svg>">
 </head>
 <body>
 <header class="site-header">
-  <div class="container header-inner">
-    <a class="logo" href="./">🧰 블로그 도구함</a>
-    <nav class="site-nav">
-      <a href="gif-maker.html">GIF</a>
-      <a href="image-resizer.html">리사이즈</a>
-      <a href="thumbnail-maker.html">썸네일</a>
-      <a href="char-counter.html">글자 수</a>
-      <a href="word-checker.html">금칙어</a>
-    </nav>
-  </div>
+  <a class="logo" href="./">블로그 도구함★</a>
+  <nav class="site-nav">
+    <a href="gif-maker.html">GIF</a>
+    <a href="image-resizer.html">리사이즈</a>
+    <a href="thumbnail-maker.html">썸네일</a>
+    <a href="char-counter.html" aria-current="page">글자 수</a>
+    <a href="word-checker.html">금칙어</a>
+  </nav>
+  <div class="header-tag">FREE / NO 가입</div>
 </header>
 
 <main class="container tool-page">
   <div class="tool-title">
-    <h1>🔤 글자 수 세기</h1>
-    <p>쓰는 대로 실시간으로 세어져요. 블로그 글은 <strong>1,500~3,000자</strong>가 적당하다고 알려져 있어요. 작성 중인 글은 이 브라우저에 자동 저장됩니다.</p>
+    <div class="tool-eyebrow">TOOL 04 — 글자 수 세기</div>
+    <h1>쓰는 대로 셉니다,<br><span class="hl">실시간으로.</span></h1>
+    <p>공백 포함/제외·단어·원고지·읽는 시간까지. 블로그 글은 1,500~3,000자가 국룰. 쓰던 글은 이 브라우저에만 저장돼요.</p>
+    <div class="sticker">자동 저장 ON</div>
   </div>
 
   <section class="panel">
@@ -45,7 +49,7 @@
       <div class="stat"><div class="stat-label">읽는 시간</div><div class="stat-value" id="cntReadTime">0분</div></div>
     </div>
 
-    <textarea id="textInput" class="counter-textarea" placeholder="여기에 글을 쓰거나 붙여넣으세요…" spellcheck="false"></textarea>
+    <textarea id="textInput" class="counter-textarea" placeholder="여기에 글을 쓰거나 붙여넣으세요… (글자 수가 바로 올라갑니다)" spellcheck="false"></textarea>
 
     <div class="goal-row">
       <label for="goalSelect">목표 글자수 (공백 포함)</label>
@@ -65,29 +69,39 @@
       </div>
     </div>
 
-    <div class="result-actions" style="margin-top:16px">
-      <button class="btn btn-secondary" id="copyBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 16H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v1"/></svg>전체 복사</button>
-      <button class="btn btn-secondary" id="clearBtn" type="button"><svg class="i" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>지우기</button>
+    <div class="result-actions" style="margin-top:20px">
+      <button class="btn btn-secondary" id="copyBtn" type="button">전체 복사</button>
+      <button class="btn btn-secondary" id="clearBtn" type="button">지우기</button>
     </div>
-    <a class="next-tool" href="word-checker.html">🚨 분량 확인했다면 금칙어 검사도 한 번 <span class="next-label">금칙어 검사 <span class="arrow">→</span></span></a>
+    <a class="next-tool" href="word-checker.html">분량 확인했다면 금칙어 검사도 한 번 <span class="next-label">금칙어 검사 <span class="arrow">→</span></span></a>
   </section>
 
   <section class="panel guide">
-    <h2>💡 블로그 글자수, 이렇게 잡아보세요</h2>
-    <ul>
-      <li><strong>1,500~3,000자</strong> — 검색 상위 글들이 대체로 이 구간이에요. 너무 짧으면 정보가 부족해 보이고, 너무 길면 이탈이 늘어요.</li>
-      <li><strong>원고지 매수</strong> — 200자 원고지 기준이에요. 과제·공모전 분량 확인에 쓰세요.</li>
-      <li><strong>읽는 시간</strong> — 분당 500자 기준 추정치예요.</li>
-      <li><strong>자동 저장</strong> — 쓰던 글은 이 브라우저에만 저장되고 서버로 전송되지 않아요. 다시 열면 이어서 쓸 수 있어요.</li>
-    </ul>
+    <h2>블로그 글자수, 이렇게 잡으세요</h2>
+    <div class="guide-grid">
+      <div class="guide-card">
+        <h3>1,500~3,000자</h3>
+        <p>검색 상위 글이 대체로 이 구간. 짧으면 부실해 보이고 길면 이탈.</p>
+      </div>
+      <div class="guide-card">
+        <h3>원고지 매수</h3>
+        <p>200자 원고지 기준. 과제·공모전 분량 확인용.</p>
+      </div>
+      <div class="guide-card">
+        <h3>읽는 시간</h3>
+        <p>분당 500자 기준 추정치예요.</p>
+      </div>
+      <div class="guide-card">
+        <h3>자동 저장</h3>
+        <p>이 브라우저에만 저장, 서버 전송 없음. 다시 열면 이어서 쓸 수 있어요.</p>
+      </div>
+    </div>
   </section>
 </main>
 
 <footer class="site-footer">
-  <div class="container">
-    <p>모든 처리는 브라우저 안에서만 이루어지며 글이 외부로 전송되지 않습니다.<br>
-    코드가 전부 공개되어 있어요 · <a href="https://github.com/happyru120/my_blog" target="_blank" rel="noopener">GitHub에서 보기</a></p>
-  </div>
+  <span>ⓒ 블로그 도구함 — <a href="https://github.com/happyru120/my_blog" target="_blank" rel="noopener">GITHUB에 코드 전부 공개</a></span>
+  <span>NO SERVER · NO SIGNUP · NO 눈물</span>
 </footer>
 
 <script type="module" src="assets/js/char-counter.js"></script>
